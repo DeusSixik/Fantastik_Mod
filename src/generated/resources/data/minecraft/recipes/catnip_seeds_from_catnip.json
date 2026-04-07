@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "fantastikmod:catnip"
+    }
+  ],
+  "result": {
+    "item": "fantastikmod:catnip_seeds"
+  }
+}

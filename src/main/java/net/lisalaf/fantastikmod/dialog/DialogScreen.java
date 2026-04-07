@@ -221,7 +221,6 @@ public class DialogScreen extends Screen {
             renderQuestScreen(guiGraphics);
         }
 
-        // СКРЫВАЕМ КНОПКИ ДИАЛОГА ЕСЛИ НЕ НА ВКЛАДКЕ 0
         if (optionButtons != null) {
             for (DialogButton button : optionButtons) {
                 if (button != null) {

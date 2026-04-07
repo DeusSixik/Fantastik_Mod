@@ -24,8 +24,19 @@ public class DialogNode {
         return this;
     }
 
-    // Геттеры
-    public Component getNpcText() { return npcText; }
-    public List<DialogOption> getOptions() { return options; }
-    public String getId() { return id; }
+    public Component getNpcText() {
+        return npcText;
+    }
+
+    public List<DialogOption> getOptions() {
+        return options;
+    }
+
+    public List<DialogOption> getCurrentOptions() {
+        return options;
+    }
+
+    public String getId() {
+        return id;
+    }
 }

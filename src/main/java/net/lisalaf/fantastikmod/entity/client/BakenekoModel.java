@@ -15,7 +15,8 @@ public class BakenekoModel extends GeoModel<BakenekoEntity> {
 
     @Override
     public ResourceLocation getTextureResource(BakenekoEntity entity) {
-        return new ResourceLocation("fantastikmod", "textures/entity/bakeneko/bakeneko.png");
+        int variant = entity.getVariant();
+        return new ResourceLocation("fantastikmod", "textures/entity/bakeneko/bakeneko_" + variant + ".png");
     }
 
     @Override

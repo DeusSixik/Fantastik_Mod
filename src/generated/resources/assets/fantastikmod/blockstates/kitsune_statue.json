@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "fantastikmod:block/kitsune_statue",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "fantastikmod:block/kitsune_statue",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "fantastikmod:block/kitsune_statue"
+    },
+    "facing=west": {
+      "model": "fantastikmod:block/kitsune_statue",
+      "y": 90
+    }
+  }
+}

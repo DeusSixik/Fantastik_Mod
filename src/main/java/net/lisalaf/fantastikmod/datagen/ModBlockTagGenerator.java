@@ -48,7 +48,8 @@ public class ModBlockTagGenerator extends BlockTagsProvider {
                         (ModBlocks.MOON_GEM_BLOCK.get()),
                         (ModBlocks.MOON_ORE.get()),
                         ModBlocks.MOON_CRYSTAL_BLOCK.get(),
-                        ModBlocks.GEMKITSUNE_BLOCK.get());
+                        ModBlocks.GEMKITSUNE_BLOCK.get(),
+                        ModBlocks.KITSUNE_STATUE.get());
 
         // Уровень инструментов
         tag(BlockTags.NEEDS_IRON_TOOL)

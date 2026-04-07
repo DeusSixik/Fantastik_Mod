@@ -222,7 +222,32 @@ public class ModBlockStateProvider extends BlockStateProvider {
                         .texture("texture", modLoc("block/frost"))
                         .renderType("translucent"));
 
+        simpleBlockWithItem(ModBlocks.CATNIP_WINE.get(),
+                models().getExistingFile(modLoc("block/catnip_wine")));
 
+        getVariantBuilder(ModBlocks.KITSUNE_STATUE.get()).forAllStates(state -> {
+            Direction dir = state.getValue(KitsuneStatueBlock.FACING);
+            return ConfiguredModel.builder()
+                    .modelFile(models().getExistingFile(modLoc("block/kitsune_statue")))
+                    .rotationY((int) dir.toYRot())
+                    .build();
+        });
+        simpleBlockItem(ModBlocks.KITSUNE_STATUE.get(),
+                models().getExistingFile(modLoc("block/kitsune_statue")));
+
+        getVariantBuilder(ModBlocks.SAKE.get()).forAllStates(state -> {
+            return ConfiguredModel.builder()
+                    .modelFile(models().getExistingFile(modLoc("block/sake")))
+                    .build();
+        });
+        simpleBlockItem(ModBlocks.SAKE.get(),
+                models().getExistingFile(modLoc("block/sake")));
+
+        simpleBlockWithItem(ModBlocks.WILD_CATNIP.get(),
+                models().cross("wild_catnip", modLoc("block/wild_catnip"))
+                        .renderType("cutout"));
+
+        makeCatnipCrop((CropBlock) ModBlocks.CATNIP_CROP.get(), "catnip_stage_", "catnip_stage_");
 
     }
 
@@ -330,6 +355,19 @@ public class ModBlockStateProvider extends BlockStateProvider {
             case EAST -> 90;
             default -> 0;
         };
+    }
+
+    public void makeCatnipCrop(CropBlock block, String modelName, String textureName) {
+        Function<BlockState, ConfiguredModel[]> function = state -> catnipStates(state, block, modelName, textureName);
+        getVariantBuilder(block).forAllStates(function);
+    }
+
+    private ConfiguredModel[] catnipStates(BlockState state, CropBlock block, String modelName, String textureName) {
+        ConfiguredModel[] models = new ConfiguredModel[1];
+        int age = state.getValue(((CatnipCropBlock) block).getAgeProperty());
+        models[0] = new ConfiguredModel(models().crop(modelName + age,
+                new ResourceLocation(fantastikmod.MOD_ID, "block/" + textureName + age)).renderType("cutout"));
+        return models;
     }
 
 }

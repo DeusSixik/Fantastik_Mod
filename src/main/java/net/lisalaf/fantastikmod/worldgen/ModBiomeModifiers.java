@@ -33,6 +33,8 @@ public class ModBiomeModifiers {
     public static final ResourceKey<BiomeModifier> ADD_KITSUNE_TO_PLAINS = registerKey("add_kitsune_to_plains");
 
     public static final ResourceKey<BiomeModifier> ADD_BAKENEKO_TO_VILLAGE_BIOMES = registerKey("add_bakeneko_to_village_biomes");
+    public static final ResourceKey<BiomeModifier> ADD_KITSUNE_STATUE_TO_CHERRY = registerKey("add_kitsune_statue_to_cherry");
+    public static final ResourceKey<BiomeModifier> ADD_WILD_CATNIP = registerKey("add_wild_catnip");
 
     public static void bootstrap(BootstapContext<BiomeModifier> context) {
         var placedFeatures = context.lookup(Registries.PLACED_FEATURE);
@@ -88,6 +90,29 @@ public class ModBiomeModifiers {
         context.register(ADD_SPIDER_LILY_TO_CHERRY, new ForgeBiomeModifiers.AddFeaturesBiomeModifier(
                 HolderSet.direct(biomes.getOrThrow(Biomes.CHERRY_GROVE)),
                 HolderSet.direct(placedFeatures.getOrThrow(ModPlacedFeatures.SPIDER_LILY_PLACED_KEY)),
+                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+        context.register(ADD_KITSUNE_STATUE_TO_CHERRY, new ForgeBiomeModifiers.AddFeaturesBiomeModifier(
+                HolderSet.direct(biomes.getOrThrow(Biomes.CHERRY_GROVE)),
+                HolderSet.direct(placedFeatures.getOrThrow(ModPlacedFeatures.KITSUNE_STATUE_PLACED_KEY)),
+                GenerationStep.Decoration.VEGETAL_DECORATION));
+
+        context.register(ADD_WILD_CATNIP, new ForgeBiomeModifiers.AddFeaturesBiomeModifier(
+                HolderSet.direct(
+                        biomes.getOrThrow(Biomes.SAVANNA),
+                        biomes.getOrThrow(Biomes.SAVANNA_PLATEAU),
+                        biomes.getOrThrow(Biomes.WINDSWEPT_SAVANNA),
+                        biomes.getOrThrow(Biomes.PLAINS),
+                        biomes.getOrThrow(Biomes.BIRCH_FOREST),
+                        biomes.getOrThrow(Biomes.OLD_GROWTH_BIRCH_FOREST),
+                        biomes.getOrThrow(Biomes.TAIGA),
+                        biomes.getOrThrow(Biomes.OLD_GROWTH_PINE_TAIGA),
+                        biomes.getOrThrow(Biomes.OLD_GROWTH_SPRUCE_TAIGA),
+                        biomes.getOrThrow(Biomes.WINDSWEPT_HILLS),
+                        biomes.getOrThrow(Biomes.WINDSWEPT_GRAVELLY_HILLS),
+                        biomes.getOrThrow(Biomes.MEADOW)
+                ),
+                HolderSet.direct(placedFeatures.getOrThrow(ModPlacedFeatures.WILD_CATNIP_PLACED_KEY)),
                 GenerationStep.Decoration.VEGETAL_DECORATION));
 
 

@@ -9,7 +9,6 @@ public class IceDragonModel extends GeoModel<IceDragonEntity> {
 
     @Override
     public ResourceLocation getModelResource(IceDragonEntity entity) {
-        // УБРАЛИ renderingEyes - модель всегда основная
         if (entity.getGrowthStage() == IceDragonEntity.STAGE_BABY) {
             return new ResourceLocation("fantastikmod", "geo/ice_dragon_baby.geo.json");
         }
@@ -20,7 +19,6 @@ public class IceDragonModel extends GeoModel<IceDragonEntity> {
 
     @Override
     public ResourceLocation getTextureResource(IceDragonEntity entity) {
-        // ОСНОВНАЯ ТЕКСТУРА
         int variant = entity.getVariant();
         String texturePath = "textures/entity/dragon/ice_dragon_" + variant + ".png";
 
@@ -39,6 +37,4 @@ public class IceDragonModel extends GeoModel<IceDragonEntity> {
         return new ResourceLocation("fantastikmod",
                 "textures/entity/dragon/eyes/ice_dragon_eyes_" + eyeVariant + ".png");
     }
-
-    // УБРАЛИ setRenderingEyes - больше не нужно
 }

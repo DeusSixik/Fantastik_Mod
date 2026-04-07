@@ -1,10 +1,7 @@
 package net.lisalaf.fantastikmod.datagen.loot;
 
 import net.lisalaf.fantastikmod.block.ModBlocks;
-import net.lisalaf.fantastikmod.block.custom.CrowberryShrubBlock;
-import net.lisalaf.fantastikmod.block.custom.RiceCropBlock;
-import net.lisalaf.fantastikmod.block.custom.StrawberryCropBlock;
-import net.lisalaf.fantastikmod.block.custom.TeaCropBlock;
+import net.lisalaf.fantastikmod.block.custom.*;
 import net.lisalaf.fantastikmod.item.ModItems;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.data.PackOutput;
@@ -68,6 +65,9 @@ public class ModBlockLootTables extends LootTableProvider {
             this.dropSelf(ModBlocks.MOON_SAPLING.get());
 
             this.dropSelf(ModBlocks.DRYING_BASKET.get());
+            this.dropSelf(ModBlocks.CATNIP_WINE.get());
+            this.dropSelf(ModBlocks.KITSUNE_STATUE.get());
+            this.dropSelf(ModBlocks.SAKE.get());
 
             // Специальные блоки
             this.add(ModBlocks.MOON_PLANKS_SLAB.get(),
@@ -123,6 +123,29 @@ public class ModBlockLootTables extends LootTableProvider {
                     )
             );
 
+            this.add(ModBlocks.WILD_CATNIP.get(), (block) ->
+                    LootTable.lootTable()
+                            .withPool(LootPool.lootPool()
+                                    .add(LootItem.lootTableItem(ModItems.CATNIP.get())
+                                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0f, 2.0f))))
+                                    .add(LootItem.lootTableItem(ModItems.CATNIP_SEEDS.get())
+                                            .when(LootItemRandomChanceCondition.randomChance(0.3f)))));
+
+            LootItemCondition.Builder condition = LootItemBlockStatePropertyCondition
+                    .hasBlockStateProperties(ModBlocks.CATNIP_CROP.get())
+                    .setProperties(StatePropertiesPredicate.Builder.properties()
+                            .hasProperty(CatnipCropBlock.AGE, 4));
+
+            this.add(ModBlocks.CATNIP_CROP.get(), (block) ->
+                    applyExplosionDecay(block,
+                            LootTable.lootTable()
+                                    .withPool(LootPool.lootPool()
+                                            .when(condition)
+                                            .add(LootItem.lootTableItem(ModItems.CATNIP.get())
+                                                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0f, 4.0f))))
+                                            .add(LootItem.lootTableItem(ModItems.CATNIP_SEEDS.get())
+                                                    .when(LootItemRandomChanceCondition.randomChance(0.5f))
+                                                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0f, 2.0f)))))));
             this.dropSelf(ModBlocks.MOON_LILY.get());
             this.add(ModBlocks.POTTED_MOON_LILY.get(), createPotFlowerItemTable(ModBlocks.MOON_LILY.get()));
 

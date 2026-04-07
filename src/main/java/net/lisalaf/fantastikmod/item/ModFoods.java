@@ -30,6 +30,13 @@ public class ModFoods {
     public static final FoodProperties MOON_CROWBERRY = new FoodProperties.Builder().nutrition(1).fast()
             .saturationMod(0.1f).effect(() -> new MobEffectInstance(MobEffects.REGENERATION, 40), 0.9f).build();
 
+    public static final FoodProperties SAKE = new FoodProperties.Builder()
+            .nutrition(2)
+            .saturationMod(0.5f)
+            .alwaysEat()
+            .effect(() -> new MobEffectInstance(MobEffects.CONFUSION, 100, 0), 0.3f)
+            .build();
+
 
     public static final FoodProperties HEART_ICE_DRAGON = new FoodProperties.Builder().nutrition(7).fast()
             .saturationMod(0.9f).effect(() -> new MobEffectInstance(MobEffects.POISON, 120), 0.4f)

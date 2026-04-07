@@ -5,7 +5,9 @@ import net.lisalaf.fantastikmod.entity.ModEntities;
 import net.lisalaf.fantastikmod.fantastikmod;
 import net.lisalaf.fantastikmod.item.custom.ModArmorItem;
 import net.lisalaf.fantastikmod.sound.ModSounds;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -14,6 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -80,6 +83,24 @@ public class ModItems {
             ()-> new Item( new Item.Properties().stacksTo(64).food(ModFoods.MATCHA_TEA)));
     public static final RegistryObject<Item> MOON_CROWBERRY = ITEMS.register("moon_crowberry",
             ()-> new  ItemNameBlockItem(ModBlocks.BUSH_CROWBERRY.get(), new Item.Properties().stacksTo(64).food(ModFoods.MOON_CROWBERRY)));
+    public static final RegistryObject<Item> SAKE_DRINK = ITEMS.register("sake_drink",
+            () -> new Item(new Item.Properties()
+                    .food(ModFoods.SAKE)
+                    .stacksTo(16)) {
+                @Override
+                public UseAnim getUseAnimation(ItemStack stack) {
+                    return UseAnim.DRINK;
+                }
+            });
+
+    public static final RegistryObject<Item> CATNIP = ITEMS.register("catnip",
+            () -> new Item(new Item.Properties().stacksTo(64)));
+
+    public static final RegistryObject<Item> DRIED_CATNIP = ITEMS.register("dried_catnip",
+            () -> new Item(new Item.Properties().stacksTo(64)));
+
+    public static final RegistryObject<Item> CATNIP_SEEDS = ITEMS.register("catnip_seeds",
+            () -> new ItemNameBlockItem(ModBlocks.CATNIP_CROP.get(), new Item.Properties().stacksTo(64)));
 
     public static final RegistryObject<Item> STRAWBERRY_SEEDS = ITEMS.register("strawberry_seeds",
             ()-> new ItemNameBlockItem(ModBlocks.STRAWBERRY_CROP.get(), new Item.Properties().stacksTo(64)));

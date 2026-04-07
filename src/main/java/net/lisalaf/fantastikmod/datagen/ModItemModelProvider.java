@@ -20,9 +20,7 @@ public class ModItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        System.out.println("=== TEST WITH ONE ITEM ===");
 
-        // Только один предмет для теста
         registerSimpleItem("egg_kitsune_light");
         registerSimpleItem("egg_ice_dragon");
         registerSimpleItem("egg_blue_butterfly");
@@ -109,8 +107,22 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent("frost", "block/snow_height2")
                 .texture("all", modLoc("block/frost"));
 
+        registerBlockItemBlockTexture("spider_lily");
+        registerBlockItemBlockTexture("moon_lily");
+        registerBlockItemBlockTexture("moon_northern_bluebell");
+        registerBlockItemBlockTexture("moon_heather");
 
+        registerBlockItemBlockTexture("moon_grass");
+        registerBlockItemBlockTexture("moon_grass_1");
+        registerBlockItem("catnip_wine");
+        registerBlockItem("kitsune_statue");
+        registerBlockItem("sake");
+        withExistingParent("sake_drink", modLoc("block/sake"));
+        registerSimpleItem("catnip");
+        registerSimpleItem("dried_catnip");
+        registerSimpleItem("catnip_seeds");
 
+        registerBlockItem("wild_catnip");
 
         saplingItem(ModBlocks.MOON_SAPLING);
 
@@ -121,10 +133,8 @@ public class ModItemModelProvider extends ItemModelProvider {
         }
     }
 
+
     private void registerArmorItems() {
-
-
-        // Регистрируем каждую часть брони
         registerArmorItem("auripigment_helmet");
         registerArmorItem("auripigment_chestplate");
         registerArmorItem("auripigment_leggings");
@@ -146,15 +156,6 @@ public class ModItemModelProvider extends ItemModelProvider {
         registerArmorItem("silver_leggings");
         registerArmorItem("silver_boots");
 
-        registerBlockItemBlockTexture("spider_lily");
-        registerBlockItemBlockTexture("moon_lily");
-        registerBlockItemBlockTexture("moon_northern_bluebell");
-        registerBlockItemBlockTexture("moon_heather");
-
-        registerBlockItemBlockTexture("moon_grass");
-        registerBlockItemBlockTexture("moon_grass_1");
-
-        System.out.println("=== ARMOR MODELS REGISTERED ===");
     }
 
     private ItemModelBuilder saplingItem(RegistryObject<Block> item) {
@@ -187,7 +188,7 @@ public class ModItemModelProvider extends ItemModelProvider {
     }
 
     private void registerFenceGateItem(String fenceGateName, String baseTexture) {
-        withExistingParent(fenceGateName, "block/block"); // Самая простая модель
+        withExistingParent(fenceGateName, "block/block");
     }
 
     public void fenceGateItem(RegistryObject<Block> block, RegistryObject<Block> baseBlock) {

@@ -1,4 +1,4 @@
-// 1.20.1	2026-02-11T06:06:35.8064067	Item Models: fantastikmod
+// 1.20.1	2026-04-06T18:33:13.1125967	Item Models: fantastikmod
 e4f952957c58594f63cdf5e2e6b57e821a387f1a assets/fantastikmod/models/item/ash_block.json
 5d412a10e5413e91a5554c1c9341e44e9796ee0b assets/fantastikmod/models/item/auripigment.json
 d1d02a227b9f0309c4fd0d949cbd418c5b0c8651 assets/fantastikmod/models/item/auripigment_block.json
@@ -9,8 +9,12 @@ cb15ade3e11853a3c3733668d7dc1e8cbefb43dd assets/fantastikmod/models/item/auripig
 a9905457dfb3961888e01eb54ffbc5dfc85ce07e assets/fantastikmod/models/item/auripigment_ore_block.json
 d2c2332b022cf8e89865d035f6f32cd803e025d7 assets/fantastikmod/models/item/black_tea.json
 a39b0aa18834c41f76f2d00a70e50968f5e65c7f assets/fantastikmod/models/item/boots_fur_ice_dragon.json
+d58ac7f3b435a46c34254645683e9e7c96e3426a assets/fantastikmod/models/item/catnip.json
+5a642a0633adbdd07657f287ab0a52789e899c6c assets/fantastikmod/models/item/catnip_seeds.json
+1f4e5b945c71b8046793658bb1c3b83e6ee02259 assets/fantastikmod/models/item/catnip_wine.json
 e1532b3b239851f0a5355797fc593563e4574534 assets/fantastikmod/models/item/chestplate_fur_ice_dragon.json
 bc0c94e40fc4b016b5cb44ade34595809333f69d assets/fantastikmod/models/item/dough_mochi.json
+6f1d5ea34cfa94bdf5eeb262487a2e6ba996879f assets/fantastikmod/models/item/dried_catnip.json
 631e3fc0c7a4dc9a6ceb0b9315eb484782a11bae assets/fantastikmod/models/item/drying_basket.json
 40ccc5057e55fdbc210a8501fad826d4e84ebce0 assets/fantastikmod/models/item/egg_bakeneko.json
 d3ec2a1c2afc6231e17f371f224d2bd0192506a6 assets/fantastikmod/models/item/egg_blue_butterfly.json
@@ -25,6 +29,7 @@ c87ba86a9bd3c30cad2c5207a032478967442a22 assets/fantastikmod/models/item/gemkits
 4ca8cf6772253ef4d4571a246b71207af0143fb5 assets/fantastikmod/models/item/green_tea.json
 155ee05e20594d4cb6c8b675b295107d318251b5 assets/fantastikmod/models/item/heart_ice_dragon.json
 3725322eb8d50d10be0d6d2c2f2c959b9ac80ddc assets/fantastikmod/models/item/helmet_fur_ice_dragon.json
+ef19f4b69e17d1b6154e43a21fbb4e0556853ec4 assets/fantastikmod/models/item/kitsune_statue.json
 660870b3f04cf5a97e25439522a9f1ca571dda92 assets/fantastikmod/models/item/leggings_fur_ice_dragon.json
 451bdef11d82535c5d4a490e1475da4bca75d2bb assets/fantastikmod/models/item/lively_soul_tamed_kitsune.json
 5f9f21db59debcaa3d539b98deb34d32215bb301 assets/fantastikmod/models/item/matcha_mochi.json
@@ -73,6 +78,8 @@ d53b1d41671941d96f0e4b1d6b87b8b6c07a21dd assets/fantastikmod/models/item/moon_sa
 923cdaff5f13580f4d97e75ef18190eb75ecccde assets/fantastikmod/models/item/note_5.json
 923cdaff5f13580f4d97e75ef18190eb75ecccde assets/fantastikmod/models/item/note_6.json
 830fdbc079025f9ca7ee9776a137c0905c217924 assets/fantastikmod/models/item/rice.json
+4d40fea2d07e51dcb09d6c742535ee98042947fb assets/fantastikmod/models/item/sake.json
+4d40fea2d07e51dcb09d6c742535ee98042947fb assets/fantastikmod/models/item/sake_drink.json
 11d15d283be4939750f9861a73bfcb4b29182d43 assets/fantastikmod/models/item/silver_axe.json
 6430d9721fff97f9ad7b68d01ea04723a11cbcce assets/fantastikmod/models/item/silver_block.json
 60f12b16b2ca48a9ceaab508433c9a5fab0b2b2f assets/fantastikmod/models/item/silver_boots.json
@@ -102,3 +109,4 @@ dc1549b6eac715c1e4881088666d33780d181a3d assets/fantastikmod/models/item/tea_lea
 c67ae7e390823e23518063215a0e3b5c2ae6d3cc assets/fantastikmod/models/item/totem_blueprint.json
 758f5f39b6b2a35f99cf10eb60838ae012eb9b67 assets/fantastikmod/models/item/tree_moon_foliage_block.json
 2490726fced3f638487c35eca7a28d7981896332 assets/fantastikmod/models/item/tree_moon_log_block.json
+e881c6165767006ae290e8b446f2a5ee42d62454 assets/fantastikmod/models/item/wild_catnip.json

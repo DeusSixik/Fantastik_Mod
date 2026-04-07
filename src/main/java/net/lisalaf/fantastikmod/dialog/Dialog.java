@@ -2,9 +2,7 @@ package net.lisalaf.fantastikmod.dialog;
 
 import net.minecraft.network.chat.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class Dialog {
     protected final Map<String, DialogNode> nodes = new HashMap<>();
@@ -33,19 +31,39 @@ public class Dialog {
     }
 
     public DialogNode getCurrentNode() {
+        DialogNode dynamicNode = getDynamicNode(currentDialogId);
+        if (dynamicNode != null) {
+            return dynamicNode;
+        }
         return currentNode;
     }
 
+    protected DialogNode getDynamicNode(String nodeId) {
+        return null;
+    }
+
     public void selectOption(int optionIndex) {
-        if (currentNode != null && optionIndex < currentNode.getOptions().size()) {
-            DialogOption selectedOption = currentNode.getOptions().get(optionIndex);
-            currentDialogId = selectedOption.getNextNodeId();
-            currentNode = nodes.get(selectedOption.getNextNodeId());
+        DialogNode node = getCurrentNode();
+
+        if (node != null && optionIndex < node.getOptions().size()) {
+            DialogOption selectedOption = node.getOptions().get(optionIndex);
+            String nextNodeId = selectedOption.getNextNodeId();
+            currentDialogId = nextNodeId;
+            currentNode = nodes.get(nextNodeId);
         }
     }
 
+    public List<DialogOption> getCurrentOptions() {
+        DialogNode node = getCurrentNode();
+        if (node != null) {
+            return node.getOptions();
+        }
+        return new ArrayList<>();
+    }
+
     public boolean isFinished() {
-        return currentNode == null || currentNode.getOptions().isEmpty();
+        DialogNode node = getCurrentNode();
+        return node == null || node.getOptions().isEmpty();
     }
 
     public void reset() {
@@ -58,12 +76,15 @@ public class Dialog {
                 "dialog.kitsune.story1", "dialog.kitsune.story2", "dialog.kitsune.story3",
                 "dialog.kitsune.story4", "dialog.kitsune.story5", "dialog.kitsune.story6"
         };
-        // Уберите объявление локальной переменной, используйте поле класса
         String randomKey = storyKeys[this.random.nextInt(storyKeys.length)];
         return Component.translatable(randomKey);
     }
 
     public boolean canStart() {
         return nodes.containsKey("start") && nodes.get("start") != null;
+    }
+
+    public String getCurrentDialogId() {
+        return currentDialogId;
     }
 }

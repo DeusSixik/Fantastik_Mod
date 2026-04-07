@@ -1,4 +1,4 @@
-// 1.20.1	2026-02-11T03:47:40.9994239	Tags for minecraft:block mod id fantastikmod
+// 1.20.1	2026-04-05T13:54:48.7994796	Tags for minecraft:block mod id fantastikmod
 e8cd148fd6f8f6bd5dd219b4a09133953506e863 data/fantastikmod/tags/blocks/needs_auripigment_tool.json
 f6d2d151d72d60b92bcdcb2745cfbc7b383b0edd data/minecraft/tags/blocks/buttons.json
 aea2222fef2e6a9bc95001896323d0b57613a965 data/minecraft/tags/blocks/doors.json
@@ -6,7 +6,7 @@ aea2222fef2e6a9bc95001896323d0b57613a965 data/minecraft/tags/blocks/doors.json
 4f0ffb1d440cb22f7591a77034bf9141a5945c4c data/minecraft/tags/blocks/fence_gates.json
 e0dbafaf7ec3acb8db54a09fb734753168d52cc5 data/minecraft/tags/blocks/logs_that_burn.json
 cfb4c4800f918c508002a190e58b3cb729dbece8 data/minecraft/tags/blocks/mineable/axe.json
-c294c96a58389fb9c070dbae18904573161e6e9b data/minecraft/tags/blocks/mineable/pickaxe.json
+b073764b6dfd794654408a13f28c9f21f88f8c7d data/minecraft/tags/blocks/mineable/pickaxe.json
 0ea4afa4888c0711a15f1d1d469012ce6e2340f7 data/minecraft/tags/blocks/mineable/shovel.json
 72f0fddb27bc070fd2fa344bc837bb98544d4310 data/minecraft/tags/blocks/needs_diamond_tool.json
 e8cd148fd6f8f6bd5dd219b4a09133953506e863 data/minecraft/tags/blocks/needs_iron_tool.json

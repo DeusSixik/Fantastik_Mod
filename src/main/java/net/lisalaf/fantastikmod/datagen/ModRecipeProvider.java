@@ -17,6 +17,55 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
 
     @Override
     protected void buildRecipes(Consumer<FinishedRecipe> pWriter) {
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.FOOD, ModItems.SAKE_DRINK.get(), 1)
+                .requires(ModBlocks.SAKE.get())
+                .unlockedBy("has_sake", has(ModBlocks.SAKE.get()))
+                .save(pWriter);
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.STRAWBERRY_SEEDS.get(), 1)
+                .requires(ModItems.STRAWBERRY.get())
+                .unlockedBy("has_strawberry", has(ModItems.STRAWBERRY.get()))
+                .save(pWriter, "strawberry_seeds_from_strawberry");
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.SAKE.get(), 1)
+                .pattern("   ")
+                .pattern(" S ")
+                .pattern("   ")
+                .define('S', ModItems.SAKE_DRINK.get())
+                .unlockedBy("has_sake_drink", has(ModItems.SAKE_DRINK.get()))
+                .save(pWriter);
+
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.FOOD, ModItems.SAKE_DRINK.get(), 1)
+                .requires(ModItems.RICE.get())
+                .requires(Items.SUGAR)
+                .requires(Items.GLASS_BOTTLE)
+                .requires(Items.WATER_BUCKET)
+                .requires(Items.BROWN_MUSHROOM)
+                .unlockedBy("has_rice", has(ModItems.RICE.get()))
+                .save(pWriter, "sake_drink_from_crafting");
+
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.FOOD, ModBlocks.CATNIP_WINE.get(), 1)
+                .requires(ModItems.CATNIP.get(), 2)
+                .requires(Items.SUGAR)
+                .requires(Items.GLASS_BOTTLE)
+                .requires(Items.WATER_BUCKET)
+                .requires(Items.FERMENTED_SPIDER_EYE)
+                .requires(Items.SWEET_BERRIES)
+                .unlockedBy("has_catnip", has(ModItems.CATNIP.get()))
+                .save(pWriter);
+
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(ModItems.CATNIP.get()),
+                        RecipeCategory.FOOD,
+                        ModItems.DRIED_CATNIP.get(),
+                        0.35f,
+                        200)
+                .unlockedBy("has_catnip", has(ModItems.CATNIP.get()))
+                .save(pWriter, "dried_catnip_from_smelting");
+
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.CATNIP_SEEDS.get(), 1)
+                .requires(ModItems.CATNIP.get())
+                .unlockedBy("has_catnip", has(ModItems.CATNIP.get()))
+                .save(pWriter, "catnip_seeds_from_catnip");
+
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.GEMKITSUNE.get(), 9)
                 .requires(ModBlocks.GEMKITSUNE_BLOCK.get())
                 .unlockedBy("has_gemkitsune_block", has(ModBlocks.GEMKITSUNE_BLOCK.get()))

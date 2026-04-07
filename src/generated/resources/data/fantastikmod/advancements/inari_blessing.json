@@ -1,0 +1,29 @@
+{
+  "parent": "fantastikmod:root",
+  "criteria": {
+    "make_offering": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.fantastikmod.inari_blessing.description"
+    },
+    "frame": "goal",
+    "hidden": false,
+    "icon": {
+      "item": "fantastikmod:kitsune_statue"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.fantastikmod.inari_blessing.title"
+    }
+  },
+  "requirements": [
+    [
+      "make_offering"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

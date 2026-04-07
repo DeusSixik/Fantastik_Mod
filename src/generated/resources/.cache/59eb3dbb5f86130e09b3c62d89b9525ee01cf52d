@@ -1,11 +1,14 @@
-// 1.20.1	2026-02-11T06:06:35.8053928	Loot Tables
+// 1.20.1	2026-04-06T18:33:13.109255	Loot Tables
 b0ac6d05772691c53f71656a660673af83b8589d data/fantastikmod/loot_tables/blocks/ash_block.json
 b1afd71791786b2bd9b446578b0212aad7be94ca data/fantastikmod/loot_tables/blocks/auripigment_block.json
 7bb11a449c0c7b07085beec173c606af5033b406 data/fantastikmod/loot_tables/blocks/auripigment_ore_block.json
 db6e1d1a640e758eee07f8ad32f40226d0d67c88 data/fantastikmod/loot_tables/blocks/bush_crowberry.json
+8bb4bbd804840b6d24fe3ddc33e93339c7ed83f2 data/fantastikmod/loot_tables/blocks/catnip_crop.json
+5b98412d16a4079e7b611b3473996d78d70b93ad data/fantastikmod/loot_tables/blocks/catnip_wine.json
 127cb48a3f439f87435298b6fbe68379acbc4b8f data/fantastikmod/loot_tables/blocks/drying_basket.json
 4f50dc8e4c81babb39c06511cdb09c2eada0ab42 data/fantastikmod/loot_tables/blocks/frost.json
 cb03c7cf434694b22e043d5965f05f01ca127aec data/fantastikmod/loot_tables/blocks/gemkitsune_block.json
+116da38086989e7ae08a94445f61b8c2b8eb2b60 data/fantastikmod/loot_tables/blocks/kitsune_statue.json
 467cc8cf82bd80c53a2426ce920f1e886312eecd data/fantastikmod/loot_tables/blocks/moonstone.json
 6ee14f74a825daae1769f9c7bc3a965f2a724cd0 data/fantastikmod/loot_tables/blocks/moon_crystal.json
 012b8db0dff2535b2b073d8ad7a2f75ffcd9b054 data/fantastikmod/loot_tables/blocks/moon_crystal_block.json
@@ -35,6 +38,7 @@ b41f803b9aeae0df2bf6093af08d9caa687778bb data/fantastikmod/loot_tables/blocks/mo
 233e695b0fee99e797c9afe97039dcc09b8040a5 data/fantastikmod/loot_tables/blocks/potted_moon_northern_bluebell.json
 9e49f5a7bc4ae521857390274cd6a407a0f8cdf3 data/fantastikmod/loot_tables/blocks/potted_spider_lily.json
 1c9fec86477ff29c8135521a80f4c9388d85b2d1 data/fantastikmod/loot_tables/blocks/rice_crop.json
+f45668ab0f1fff3e67c8b0322a64faec179785c2 data/fantastikmod/loot_tables/blocks/sake.json
 d6e267d9c3e3bf4dfaa9c137780e2d4d37ecf1d9 data/fantastikmod/loot_tables/blocks/silver_block.json
 e9a00b3d3e959122ad7d498ad243812f7bdd5793 data/fantastikmod/loot_tables/blocks/silver_ore.json
 0e99333dbce2b315f8c7f0498a27b01a0f7f011a data/fantastikmod/loot_tables/blocks/spider_lily.json
@@ -42,3 +46,4 @@ ff5f2eb8a514be2da13a416e7c779cc9d56ce224 data/fantastikmod/loot_tables/blocks/st
 b1f0cfe2d08a0e03e2a5fa2f4a4130c8459f555f data/fantastikmod/loot_tables/blocks/tea_crop.json
 c9bedde29e7e5835d653f1d646a9b4d4c0ef5e41 data/fantastikmod/loot_tables/blocks/tree_moon_foliage_block.json
 a8bdb70e9881d04dbf28b5e289335b83fafb7739 data/fantastikmod/loot_tables/blocks/tree_moon_log_block.json
+bcd21175f07fb9bb82535c4d1f0e01d371f6e3dc data/fantastikmod/loot_tables/blocks/wild_catnip.json

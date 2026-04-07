@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "hanging=false,waterlogged=false": {
+      "model": "fantastikmod:block/sake"
+    },
+    "hanging=false,waterlogged=true": {
+      "model": "fantastikmod:block/sake"
+    },
+    "hanging=true,waterlogged=false": {
+      "model": "fantastikmod:block/sake"
+    },
+    "hanging=true,waterlogged=true": {
+      "model": "fantastikmod:block/sake"
+    }
+  }
+}

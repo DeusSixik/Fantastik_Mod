@@ -1,10 +1,12 @@
-// 1.20.1	2025-12-21T00:18:35.625709	Advancements
+// 1.20.1	2026-04-06T20:39:41.1141175	Advancements
+1d645648cca4fa2578924a089b35f88be1d5691e data/fantastikmod/advancements/catnip_master.json
 ff093f0d1a098b620aec51b0331379fffe70d4f8 data/fantastikmod/advancements/enter_biome.json
 2f8eb8be92165b51da7bde02ac0595d1e75ff71f data/fantastikmod/advancements/full_auripigment_armor.json
 bece6a022e4513f9e2d92bb9eb67bcb50956248b data/fantastikmod/advancements/full_moon_armor.json
 d94ea50146fd543dccda27fa8b68a692fe4e0a90 data/fantastikmod/advancements/full_moon_tools.json
 02fdaaa5b34fc99b1c945ab55de9319e16bd2a8e data/fantastikmod/advancements/get_auripigment.json
 bf91d760d39a9d60de4788993dfeb13d04ab0477 data/fantastikmod/advancements/get_moon_gem.json
+c69a5735cf09c2e4399808def82bbb09557fe893 data/fantastikmod/advancements/inari_blessing.json
 63b55ab8ac79cd531c3b1da7165e743603c6b555 data/fantastikmod/advancements/root.json
 afec4f0a7b04e416b888068d084a6e2afecb83a6 data/fantastikmod/advancements/tame_kitsune.json
 39d5c62cbb4eeb0bfba3838e81e67f12e5da55cb data/fantastikmod/advancements/tame_moon_deer.json

@@ -55,6 +55,11 @@ public class ModCreativeModTabs {
                         output.accept(ModItems.DOUGH_MOCHI.get());
                         output.accept(ModItems.STRAWBERRY_MOCHI.get());
                         output.accept(ModItems.MOCHI.get());
+                        output.accept(ModBlocks.CATNIP_WINE.get());
+                        output.accept(ModItems.SAKE_DRINK.get());
+                        output.accept(ModItems.CATNIP.get());
+                        output.accept(ModItems.DRIED_CATNIP.get());
+                        output.accept(ModItems.CATNIP_SEEDS.get());
                         output.accept(ModItems.SILVER_STICK.get());
                         output.accept(ModItems.MOON_AXE.get());
                         output.accept(ModItems.MOON_PICKAXE.get());
@@ -113,6 +118,7 @@ public class ModCreativeModTabs {
                         output.accept(ModBlocks.SILVER_ORE.get());
                         output.accept(ModBlocks.MOON_GEM_BLOCK.get());
                         output.accept(ModBlocks.SILVER_BLOCK.get());
+                        output.accept(ModBlocks.KITSUNE_STATUE.get());
 
                         output.accept(ModBlocks.DRYING_BASKET.get());
 
@@ -122,6 +128,7 @@ public class ModCreativeModTabs {
                         output.accept(ModBlocks.MOON_GRASS_1.get());
                         output.accept(ModBlocks.MOON_GRASS.get());
                         output.accept(ModBlocks.SPIDER_LILY.get());
+                        output.accept(ModBlocks.WILD_CATNIP.get());
 
                         output.accept(ModBlocks.MOON_VINE.get());
                         output.accept(ModBlocks.FROST.get());

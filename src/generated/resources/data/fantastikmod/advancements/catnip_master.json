@@ -1,0 +1,38 @@
+{
+  "parent": "fantastikmod:root",
+  "criteria": {
+    "has_catnip": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "fantastikmod:catnip"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.fantastikmod.catnip_master.description"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "fantastikmod:catnip"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.fantastikmod.catnip_master.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_catnip"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

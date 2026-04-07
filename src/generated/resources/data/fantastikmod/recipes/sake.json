@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": {
+      "item": "fantastikmod:sake_drink"
+    }
+  },
+  "pattern": [
+    "   ",
+    " S ",
+    "   "
+  ],
+  "result": {
+    "item": "fantastikmod:sake"
+  },
+  "show_notification": true
+}

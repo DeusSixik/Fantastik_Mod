@@ -1,7 +1,6 @@
 {
 	"format_version": "1.9.0",
 	"credit": "Made with Blockbench",
-	"parent": "egg_ice_dragon",
 	"texture_size": [128, 128],
 	"textures": {
 		"0": "egg_ice_dragon",

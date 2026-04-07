@@ -24,8 +24,8 @@ public class ModEntities {
 
     public static final RegistryObject<EntityType<IceDragonEntity>> ICE_DRAGON =
             ENTITY_TYPES.register("ice_dragon", () -> EntityType.Builder.of(IceDragonEntity::new, MobCategory.CREATURE)
-                    .sized(8.0f, 12.0f) // Обнови размеры хитбокса чтобы соответствовали твоим 8x12
-                    .clientTrackingRange(32) // ДОБАВЬ ЭТУ СТРОЧКУ! 32 chunks = 512 blocks
+                    .sized(6.0f, 12.0f)
+                    .clientTrackingRange(32)
                     .build("ice_dragon"));
 
     public static final RegistryObject<EntityType<MoonDeerEntity>> MOON_DEER =
@@ -34,7 +34,7 @@ public class ModEntities {
 
     public static final RegistryObject<EntityType<BlueButterflyEntity>> BLUE_BUTTERFLY =
             ENTITY_TYPES.register("blue_butterfly", () -> EntityType.Builder.of(BlueButterflyEntity::new, MobCategory.CREATURE)
-                    .sized(0.2f, 0.2f) // Увеличьте размер
+                    .sized(0.2f, 0.2f)
                     .clientTrackingRange(10)
                     .build("blue_butterfly"));
 

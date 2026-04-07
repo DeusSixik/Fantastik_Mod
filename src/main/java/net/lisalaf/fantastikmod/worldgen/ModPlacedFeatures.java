@@ -44,6 +44,8 @@ public class ModPlacedFeatures {
 
     public static final ResourceKey<PlacedFeature> DRAGON_CAVE_PLACED_KEY = registerKey("dragon_cave_placed");
     public static final ResourceKey<PlacedFeature> MOON_CRYSTAL_CLUSTER_PLACED_KEY = registerKey("moon_crystal_cluster_placed");
+    public static final ResourceKey<PlacedFeature> KITSUNE_STATUE_PLACED_KEY = registerKey("kitsune_statue_placed");
+    public static final ResourceKey<PlacedFeature> WILD_CATNIP_PLACED_KEY = registerKey("wild_catnip_placed");
 
 
     public static void bootstrap(BootstapContext<PlacedFeature> context) {
@@ -62,7 +64,7 @@ public class ModPlacedFeatures {
 
         register(context, AURIPIGMENT_ORE_PLACED_KEI, configuredFeatures.getOrThrow(ModConfiguredFeatures.OVERWORLD_AURIPIGMENT_ORE_KEY),
                 List.of(
-                        CountPlacement.of(3),
+                        CountPlacement.of(2),
                         InSquarePlacement.spread(),
                         HeightRangePlacement.triangle(
                                 VerticalAnchor.absolute(-10),
@@ -182,6 +184,25 @@ public class ModPlacedFeatures {
                 configuredFeatures.getOrThrow(ModConfiguredFeatures.MOON_CRYSTAL_CLUSTER_KEY),
                 List.of(
                         RarityFilter.onAverageOnceEvery(8),
+                        InSquarePlacement.spread(),
+                        PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                        BiomeFilter.biome()
+                ));
+
+        register(context, KITSUNE_STATUE_PLACED_KEY,
+                configuredFeatures.getOrThrow(ModConfiguredFeatures.KITSUNE_STATUE_KEY),
+                List.of(
+                        RarityFilter.onAverageOnceEvery(50),
+                        InSquarePlacement.spread(),
+                        PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                        SurfaceWaterDepthFilter.forMaxDepth(0),
+                        BiomeFilter.biome()
+                ));
+
+        register(context, WILD_CATNIP_PLACED_KEY,
+                configuredFeatures.getOrThrow(ModConfiguredFeatures.WILD_CATNIP_KEY),
+                List.of(
+                        RarityFilter.onAverageOnceEvery(2),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BiomeFilter.biome()

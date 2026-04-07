@@ -1150,25 +1150,21 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        // Сохраняем состояние сна до обработки урона
         boolean wasSleeping = this.isSleeping();
         Player attacker = null;
         if (source.getEntity() instanceof Player player) {
             attacker = player;
         }
 
-        // Увеличиваем счётчик ударов до обработки
         int oldHitCount = getHitCount();
         if (source.getEntity() instanceof Player) {
             setHitCount(oldHitCount + 1);
         }
 
-        // Сбрасываем анимации отдыха при ЛЮБОМ получении урона
         if (!this.level().isClientSide && amount > 0) {
             resetRestingAnimations();
         }
 
-        // Уворот от стрел
         if (source.getDirectEntity() instanceof AbstractArrow && dodgeCooldown <= 0) {
             if (random.nextFloat() < 0.3f) {
                 dodgeArrow((Projectile) source.getDirectEntity());
@@ -1176,11 +1172,8 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
                 return false;
             }
         }
-
-        // Обрабатываем урон
         boolean hurt = super.hurt(source, amount);
 
-        // Отправляем сообщение ПОСЛЕ обработки урона, если кицунэ спала
         if (!this.level().isClientSide && wasSleeping && attacker != null) {
             sendWakeUpMessage(attacker);
         }
@@ -1193,11 +1186,10 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
             }
         }
 
-        // Проверяем сообщения для диких кицунэ ПОСЛЕ увеличения счётчика
         if (!this.level().isClientSide && !this.isTamed() && attacker != null) {
-            if (oldHitCount == 0 && getHitCount() == 1) { // Первый удар
+            if (oldHitCount == 0 && getHitCount() == 1) {
                 sendWildHurtMessage(attacker);
-            } else if (oldHitCount == 1 && getHitCount() == 2) { // Второй удар
+            } else if (oldHitCount == 1 && getHitCount() == 2) {
                 sendAngryWildMessage(attacker);
                 setAngry(true);
             }
@@ -1209,12 +1201,10 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
 
     @Override
     public boolean doHurtTarget(Entity target) {
-        // Детёныши не могут атаковать
         if (this.isBaby()) {
             return false;
         }
 
-        // Сбрасываем анимации отдыха при атаке
         if (!this.level().isClientSide) {
             resetRestingAnimations();
         }
@@ -1280,10 +1270,8 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
     private void useMagicAbilities() {
         if (level().isClientSide) return;
 
-        // 1. Защита от криперов - создаем защитное поле (ВСЕГДА при наличии криперов)
         this.createExplosionProtectionField();
 
-        // 2. Проверяем криперов и применяем защиту (более надежно)
         List<Creeper> nearbyCreepers = this.level().getEntitiesOfClass(Creeper.class,
                 this.getBoundingBox().inflate(10.0D));
 
@@ -1291,30 +1279,25 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
             this.protectFromCreepers();
         }
 
-        // 3. Лечение союзников
         this.healAllies();
 
-        // 4. Баффы для себя
         this.applySelfBuffs();
     }
 
     private void protectFromCreepers() {
         List<Creeper> nearbyCreepers = this.level().getEntitiesOfClass(Creeper.class,
-                this.getBoundingBox().inflate(12.0D)); // Увеличиваем радиус
+                this.getBoundingBox().inflate(12.0D));
 
         for (Creeper creeper : nearbyCreepers) {
-            // Упрощаем условие - защищаем от ЛЮБОГО крипера в радиусе
             boolean shouldProtect = creeper.isIgnited() ||
                     creeper.getSwellDir() > 0 ||
-                    this.distanceToSqr(creeper) < 36.0D; // 6 блоков
+                    this.distanceToSqr(creeper) < 36.0D;
 
             if (shouldProtect) {
-                // Создаем эффект сопротивления взрывам у всех кицунэ поблизости
                 List<KitsuneLightEntity> nearbyKitsune = this.level().getEntitiesOfClass(
-                        KitsuneLightEntity.class, this.getBoundingBox().inflate(16.0D)); // Увеличиваем радиус
+                        KitsuneLightEntity.class, this.getBoundingBox().inflate(16.0D));
 
                 for (KitsuneLightEntity kitsune : nearbyKitsune) {
-                    // Проверяем, нет ли уже эффекта
                     if (!kitsune.hasEffect(MobEffects.DAMAGE_RESISTANCE)) {
                         kitsune.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 200, 1));
                     }
@@ -1322,26 +1305,20 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
                         kitsune.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 0));
                     }
                 }
-
-                // Создаем частицы магии
                 this.spawnMagicParticles();
 
-                // Воспроизводим звук магии
                 if (!this.level().isClientSide) {
                     this.playSound(ModSounds.KITSUNE_IDLE1.get(), 0.8F, 1.2F);
                 }
-                break; // Защищаем только от одного ближайшего крипера
+                break;
             }
         }
     }
 
     private void healAllies() {
         if (this.getHealth() < this.getMaxHealth() * 0.7f) {
-            // Самолечение
             this.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 0));
         }
-
-        // Лечение других кицунэ
         List<KitsuneLightEntity> nearbyKitsune = this.level().getEntitiesOfClass(
                 KitsuneLightEntity.class, this.getBoundingBox().inflate(10.0D));
 
@@ -1353,7 +1330,6 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
     }
 
     private void applySelfBuffs() {
-        // Случайные баффы с шансом 30%
         if (this.random.nextFloat() < 0.1f) {
             MobEffect[] possibleBuffs = {
                     MobEffects.MOVEMENT_SPEED,
@@ -1371,18 +1347,15 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
                 this.getBoundingBox().inflate(12.0D)); // Увеличиваем радиус
 
         for (Creeper creeper : nearbyCreepers) {
-            // Более надежное условие для защиты
             boolean shouldProtect = creeper.isIgnited() ||
                     creeper.getSwellDir() > 0 ||
                     this.getTarget() == creeper ||
                     this.distanceToSqr(creeper) < 25.0D; // 5 блоков
 
             if (shouldProtect) {
-                // Помечаем крипера - его взрыв не будет разрушать блоки
                 CompoundTag persistentData = creeper.getPersistentData();
                 persistentData.putBoolean("KitsuneProtectedExplosion", true);
-                // Добавляем временную метку с запасом
-                persistentData.putLong("KitsuneProtectionTime", this.level().getGameTime() + 300); // +5 секунд
+                persistentData.putLong("KitsuneProtectionTime", this.level().getGameTime() + 300);
             }
         }
     }
@@ -1435,15 +1408,12 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
     private void spawnFoxFire(LivingEntity target) {
         if (this.level().isClientSide) return;
 
-        // Создаем синий/яркий огонь душ
         for(int i = 0; i < 3; ++i) {
             double dx = target.getX() - this.getX();
             double dy = target.getY(0.5) - this.getY(0.5);
             double dz = target.getZ() - this.getZ();
 
-            // Создаем частицы синего огня
             if (this.level() instanceof ServerLevel serverLevel) {
-                // Используем SOUL_FIRE_FLAME с измененным цветом через кастомные частицы
                 serverLevel.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
                         this.getX() + (dx * 0.25),
                         this.getY(0.5) + (dy * 0.25),
@@ -1452,11 +1422,9 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
             }
         }
 
-        // Наносим урон и поджигаем цель
         target.hurt(this.damageSources().mobAttack(this), 3.0F);
         target.setSecondsOnFire(5);
 
-        // Воспроизводим звук
         this.playSound(ModSounds.KITSUNE_ANGRY1.get(), 1.0F, 1.5F);
     }
 
@@ -1515,7 +1483,6 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
     }
 
     public boolean canMove() {
-        // Проверяем все состояния, которые блокируют движение
         boolean cannotMove = isSitting() ||
                 isSleeping() ||
                 isSitAnimPlaying() ||
@@ -1533,7 +1500,6 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
 
 
     public void resetRestingAnimations() {
-        // Сбрасываем все флаги анимаций
         setSitting(false);
         setSleeping(false);
         setSitAnimPlaying(false);
@@ -1542,19 +1508,10 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
         setWakeAnimPlaying(false);
         setYawning(false);
 
-        // Сбрасываем таймеры
         sitTimer = 0;
         sleepTimer = 0;
         animationTimer = 0;
         yawnTimer = 0;
-
-        // НЕ ВКЛЮЧАЕМ агрессивное состояние сразу - пусть сообщения отправятся
-        // if (!isTamed()) {
-        //     setAngry(true);
-        //     setHitCount(2); // Сразу переводим в злое состояние
-        // }
-
-        // Возобновляем движение
         this.getNavigation().stop();
     }
 
@@ -1564,19 +1521,16 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
         return super.canUpdate() && !isSleeping();
     }
 
-    // Блокировка движения при сидении/сне
     @Override
     public void travel(Vec3 travelVector) {
         if (isSitting() || isSleeping() || isSitAnimPlaying() || isStandAnimPlaying() ||
                 isSleepAnimPlaying() || isWakeAnimPlaying()) {
-            // Полностью блокируем движение
             this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
             return;
         }
         super.travel(travelVector);
     }
 
-    // Блокировка прыжков
     @Override
     public boolean causeFallDamage(float distance, float damageMultiplier, DamageSource source) {
         return !isSitting() && !isSleeping() && super.causeFallDamage(distance, damageMultiplier, source);
@@ -1585,8 +1539,6 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
     @Override
     public void aiStep() {
         super.aiStep();
-
-        // Дополнительная блокировка движения
         if (isSitting() || isSleeping() || isSitAnimPlaying() || isStandAnimPlaying() ||
                 isSleepAnimPlaying() || isWakeAnimPlaying()) {
             this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
@@ -1595,7 +1547,6 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
     }
 
     private void tryToTeleportToOwner(LivingEntity owner) {
-        // Пытаемся найти безопасное место рядом с игроком
         for (int i = 0; i < 10; i++) {
             double x = owner.getX() + (this.random.nextDouble() - 0.5) * 8;
             double y = owner.getY() + this.random.nextInt(3) - 1;
@@ -1603,7 +1554,7 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
 
             if (this.canTeleportTo(new BlockPos((int)x, (int)y, (int)z))) {
                 this.teleportTo(x, y, z);
-                this.getNavigation().stop(); // Останавливаем навигацию
+                this.getNavigation().stop();
                 spawnTeleportParticles();
                 break;
             }
@@ -1611,7 +1562,6 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
     }
 
     private boolean canTeleportTo(BlockPos pos) {
-        // Проверяем что место безопасное
         return this.level().isEmptyBlock(pos) &&
                 this.level().isEmptyBlock(pos.above()) &&
                 this.level().getBlockState(pos.below()).isSolid();
@@ -1631,13 +1581,11 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
     @Override
     protected void dropExperience() {
         if (this.shouldDropExperience()) {
-            // От 5 до 10 очков опыта
             this.dropExperience(5 + this.random.nextInt(6));
         }
     }
 
     private void dropExperience(int experience) {
-        // Просто вызываем родительский метод
         super.dropExperience();
     }
 
@@ -1652,7 +1600,6 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
 
     @Override
     public Component getDisplayName() {
-        // Если есть кастомное имя - используем его, иначе стандартное
         if (this.hasCustomName()) {
             return this.getCustomName();
         }
@@ -1684,39 +1631,25 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
     public KitsuneLightEntity(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);
         setRandomName();
-
-        System.out.println("=== DEBUG: After setRandomName ===");
-        System.out.println("CustomName: " + (this.getCustomName() != null ? this.getCustomName().getString() : "NULL"));
-        System.out.println("hasCustomName(): " + this.hasCustomName());
-        System.out.println("isCustomNameVisible(): " + this.isCustomNameVisible());
     }
 
     @Override
     public boolean isCustomNameVisible() {
-        // Всегда показывать имя, если оно установлено
         return this.hasCustomName();
     }
 
     @Override
     public boolean hasCustomName() {
-        // Более надежная проверка наличия кастомного имени
         return this.getCustomName() != null && !this.getCustomName().getString().isEmpty();
     }
 
     private void setRandomName() {
 
-        System.out.println("=== DEBUG: setRandomName called ===");
-        System.out.println("Current CustomName: " + (this.getCustomName() != null ? this.getCustomName().getString() : "NULL"));
         if (this.getCustomName() == null) {
             String[] namePair = KITSUNE_NAMES[this.random.nextInt(KITSUNE_NAMES.length)];
-            // Устанавливаем имя сразу с правильным языком
             String name = shouldUseRussian() ? namePair[1] : namePair[0];
             this.setCustomName(Component.literal(name));
-            System.out.println("=== DEBUG: Name set to: " + name + " ===");
-
-            System.out.println("After setting - CustomName: " + (this.getCustomName() != null ? this.getCustomName().getString() : "NULL"));
         } else {
-            System.out.println("=== DEBUG: Name already exists, skipping ===");
         }
     }
 
@@ -1724,8 +1657,7 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
         if (this.level().isClientSide) {
             return Minecraft.getInstance().options.languageCode.startsWith("ru");
         } else {
-            // Для сервера нужно определить язык по-другому
-            // Например, использовать isRussianPlayer метод
+
             Player nearestPlayer = this.level().getNearestPlayer(this, 10);
             return nearestPlayer != null && isRussianPlayer(nearestPlayer);
         }
@@ -1973,7 +1905,7 @@ public class KitsuneLightEntity extends Animal implements GeoEntity, MobMood {
 
     @Override
     public boolean fireImmune() {
-        return true; // Кицунэ не горит в огне и лаве
+        return true;
     }
 
 

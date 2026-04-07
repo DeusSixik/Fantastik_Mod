@@ -17,19 +17,16 @@ public class KitsuneMood extends MoodSystem {
         if (!(entity instanceof KitsuneLightEntity kitsune)) return;
 
         long currentTime = level.getGameTime();
-
-        // Обновляем не чаще чем раз в 20 тиков (1 секунда)
-        if (currentTime - lastUpdateTime < 20) return;
+        
+        if (currentTime - lastUpdateTime < 200) return;
         lastUpdateTime = currentTime;
 
-        // Обработка сидения
         if (kitsune.isSitting()) {
             if (!wasSitting) {
                 lastSitTime = currentTime;
                 wasSitting = true;
             }
 
-            // Каждые 30 секунд (600 тиков) в сидячем положении -1 к настроению
             if (currentTime - lastSitTime > 600) {
                 addMood(-1);
                 lastSitTime = currentTime;
@@ -39,11 +36,9 @@ public class KitsuneMood extends MoodSystem {
             lastSitTime = 0;
         }
 
-        // Обработка брожения
         boolean isMoving = kitsune.getDeltaMovement().horizontalDistanceSqr() > 0.001D;
         if (isMoving && !kitsune.isSitting() && !kitsune.isSleeping()) {
             wanderingTime++;
-            // Каждые 30 секунд (600 тиков) брожения +2 к настроению
             if (wanderingTime >= 600) {
                 addMood(2);
                 wanderingTime = 0;
@@ -52,10 +47,9 @@ public class KitsuneMood extends MoodSystem {
             wanderingTime = Math.max(0, wanderingTime - 1);
         }
 
-        // Автоматическое восстановление настроения со временем
-        if (currentTime % 1200 == 0) { // Каждую минуту
+        if (currentTime % 1200 == 0) {
             if (moodValue < 0) {
-                addMood(1); // Медленное восстановление
+                addMood(1);
             }
         }
     }
@@ -64,10 +58,7 @@ public class KitsuneMood extends MoodSystem {
     public void addMood(int amount) {
         int oldValue = moodValue;
         super.addMood(amount);
-
-        // Логирование для отладки
         if (Math.abs(amount) > 0) {
-            System.out.println("[KitsuneMood] Changed from " + oldValue + " to " + moodValue + " (delta: " + amount + ")");
         }
     }
 
@@ -75,6 +66,5 @@ public class KitsuneMood extends MoodSystem {
     public void setMood(int value) {
         int oldValue = moodValue;
         super.setMood(value);
-        System.out.println("[KitsuneMood] Set from " + oldValue + " to " + moodValue);
     }
 }

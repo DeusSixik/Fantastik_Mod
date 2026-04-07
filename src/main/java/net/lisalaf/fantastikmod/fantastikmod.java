@@ -6,6 +6,7 @@ import net.lisalaf.fantastikmod.block.ModBlocks;
 import net.lisalaf.fantastikmod.datagen.loot.AddItemModifier;
 import net.lisalaf.fantastikmod.datagen.loot.ModLootModfiers;
 import net.lisalaf.fantastikmod.dialog.DialogSystem;
+import net.lisalaf.fantastikmod.effect.ModEffects;
 import net.lisalaf.fantastikmod.entity.ModEntities;
 import net.lisalaf.fantastikmod.entity.client.*;
 import net.lisalaf.fantastikmod.entity.custom.BakenekoEntity;
@@ -68,6 +69,8 @@ public class fantastikmod {
 
         ModLootModfiers.register(modEventBus);
 
+        ModEffects.register(modEventBus);
+
         modEventBus.addListener(this::commonSetup);
 
         modEventBus.addListener(this::gatherData);
@@ -81,7 +84,6 @@ public class fantastikmod {
         modEventBus.addListener(this::addCreative);
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addListener(this::addFuel);
-
 
 
     }

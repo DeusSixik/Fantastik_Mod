@@ -1,6 +1,7 @@
 package net.lisalaf.fantastikmod.datagen;
 
 import net.lisalaf.fantastikmod.block.ModBlocks;
+import net.lisalaf.fantastikmod.effect.ModEffects;
 import net.lisalaf.fantastikmod.entity.ModEntities;
 import net.lisalaf.fantastikmod.fantastikmod;
 import net.lisalaf.fantastikmod.item.ModItems;
@@ -138,6 +139,24 @@ public class ModAdvancementProvider extends ForgeAdvancementProvider {
                     .addCriterion("tame_moon_deer", TameAnimalTrigger.TriggerInstance.tamedAnimal(
                             EntityPredicate.Builder.entity().of(ModEntities.MOON_DEER.get()).build()))
                     .save(consumer, new ResourceLocation(fantastikmod.MOD_ID, "tame_moon_deer"), helper);
+
+            Advancement catnipMaster = Advancement.Builder.advancement()
+                    .parent(root)
+                    .display(ModItems.CATNIP.get(),
+                            Component.translatable("advancement.fantastikmod.catnip_master.title"),
+                            Component.translatable("advancement.fantastikmod.catnip_master.description"),
+                            null, FrameType.TASK, true, true, false)
+                    .addCriterion("has_catnip", InventoryChangeTrigger.TriggerInstance.hasItems(ModItems.CATNIP.get()))
+                    .save(consumer, new ResourceLocation(fantastikmod.MOD_ID, "catnip_master"), helper);
+
+            Advancement inariBlessing = Advancement.Builder.advancement()
+                    .parent(root)
+                    .display(ModBlocks.KITSUNE_STATUE.get().asItem(),
+                            Component.translatable("advancement.fantastikmod.inari_blessing.title"),
+                            Component.translatable("advancement.fantastikmod.inari_blessing.description"),
+                            null, FrameType.GOAL, true, true, false)
+                    .addCriterion("make_offering", new ImpossibleTrigger.TriggerInstance())
+                    .save(consumer, new ResourceLocation(fantastikmod.MOD_ID, "inari_blessing"), helper);
         }
     }
 }

@@ -3,7 +3,6 @@ package net.lisalaf.fantastikmod.entity.custom;
 import net.lisalaf.fantastikmod.entity.ai.IceDragonGoal;
 import net.lisalaf.fantastikmod.item.ModItems;
 import net.lisalaf.fantastikmod.sound.ModSounds;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -45,13 +44,9 @@ import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import java.util.Objects;
-
 public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
-
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
-    private static final EntityDataAccessor<Boolean> DATA_BABY = SynchedEntityData.defineId(IceDragonEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_VARIANT = SynchedEntityData.defineId(IceDragonEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_EYE_VARIANT = SynchedEntityData.defineId(IceDragonEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_FLYING = SynchedEntityData.defineId(IceDragonEntity.class, EntityDataSerializers.BOOLEAN);
@@ -63,7 +58,6 @@ public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
     private static final EntityDataAccessor<Boolean> DATA_ATTACKING = SynchedEntityData.defineId(IceDragonEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<String> DATA_NAME = SynchedEntityData.defineId(IceDragonEntity.class, EntityDataSerializers.STRING);
 
-    // Анимации
     private static final RawAnimation IDLE_ANIMATION = RawAnimation.begin().thenLoop("idle");
     private static final RawAnimation WALK_ANIMATION = RawAnimation.begin().thenLoop("walk");
     private static final RawAnimation FLIGHT_START_ANIMATION = RawAnimation.begin().thenPlay("flight_started");
@@ -74,43 +68,46 @@ public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
 
     private int takeoffAnimationTimer = 0;
     private int landingAnimationTimer = 0;
-    private int growthTimer = 0;
     private int attackTimer = 0;
+    private int furDropTimer = 0;
 
-    private static final int GROWTH_INTERVAL = 30 * 60 * 20;
+    private static final int GROWTH_INTERVAL = 24000;
+    private static final int FUR_DROP_INTERVAL = 10 * 60 * 20;
 
-    public static final int STAGE_BABY = 0;      // Малыш (0-30 мин)
-    public static final int STAGE_TEEN = 1;      // Подросток (30-60 мин)
-    public static final int STAGE_YOUNG = 2;     // Юный (60-90 мин)
-    public static final int STAGE_ADULT = 3;     // Взрослый (90+ мин)
+    public static final int STAGE_BABY = 0;
+    public static final int STAGE_TEEN = 1;
+    public static final int STAGE_YOUNG = 2;
+    public static final int STAGE_ADULT = 3;
 
-    @Override
-    public boolean isMultipartEntity() {
-        return false;
-    }
+    private DragonPart[] dragonParts;
+    private static final int PART_HEAD = 0;
+    private static final int PART_BODY = 1;
+    private static final int PART_NECK = 2;
+    private static final int PART_TAIL = 3;
+    private static final int PART_LEFT_WING = 4;
+    private static final int PART_RIGHT_WING = 5;
+    private static final int PART_LEFT_LEG_FRONT = 6;
+    private static final int PART_RIGHT_LEG_FRONT = 7;
+    private static final int PART_LEFT_LEG_BACK = 8;
+    private static final int PART_RIGHT_LEG_BACK = 9;
 
-    @Override
-    public PartEntity<?>[] getParts() {
-        return new PartEntity[0];
-    }
+    private static final float[] DAMAGE_MULTIPLIERS = {1.5f, 0.8f, 1.0f, 0.7f, 1.2f, 1.2f, 1.0f, 1.0f, 1.0f, 1.0f};
 
     public static class DragonPart extends PartEntity<IceDragonEntity> {
         private final String partName;
-        private final float width;
-        private final float height;
+        private final EntityDimensions dimensions;
+        private final float damageMultiplier;
 
-        public DragonPart(IceDragonEntity parent, String partName, float width, float height) {
+        public DragonPart(IceDragonEntity parent, String partName, float width, float height, float damageMultiplier) {
             super(parent);
             this.partName = partName;
-            this.width = width;
-            this.height = height;
+            this.dimensions = EntityDimensions.scalable(width, height);
+            this.damageMultiplier = damageMultiplier;
             this.refreshDimensions();
         }
 
         @Override
-        public boolean isPickable() {
-            return true;
-        }
+        public boolean isPickable() { return true; }
 
         @Override
         protected void readAdditionalSaveData(CompoundTag pCompound) {}
@@ -123,115 +120,194 @@ public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
 
         @Override
         public boolean hurt(DamageSource source, float amount) {
-            return !this.isInvulnerableTo(source) && this.getParent().hurt(source, amount);
+            return !this.isInvulnerableTo(source) && this.getParent().hurt(source, amount * this.damageMultiplier);
         }
 
         @Override
         public EntityDimensions getDimensions(Pose pose) {
-            return EntityDimensions.scalable(this.width, this.height);
+            return this.dimensions;
         }
 
         @Override
-        public boolean shouldBeSaved() {
-            return false;
-        }
-    }
+        public boolean shouldBeSaved() { return false; }
 
-    @Override
-    public EntityDimensions getDimensions(Pose pose) {
-        int stage = this.getGrowthStage();
-
-        switch(stage) {
-            case STAGE_BABY:
-                return EntityDimensions.scalable(0.5f, 1.0f);
-            case STAGE_TEEN:
-                return EntityDimensions.scalable(2.5f, 5.5f);
-            case STAGE_YOUNG:
-                return EntityDimensions.scalable(3.0f, 6.0f);
-            case STAGE_ADULT:
-            default:
-                float baseWidth = 5.0f;
-                float baseHeight = 12.0f;
-
-                if (this.isFlying()) {
-                    baseHeight = 4.0f;
-                }
-
-                float adultScale = this.isFemale() ? 1.1f : 1.0f;
-                return EntityDimensions.scalable(baseWidth * adultScale, baseHeight * adultScale);
-        }
-    }
-
-    @Override
-    protected AABB makeBoundingBox() {
-        EntityDimensions dimensions = this.getDimensions(this.getPose());
-        float width = dimensions.width;
-        float height = dimensions.height;
-
-        float depth;
-        int stage = this.getGrowthStage();
-
-        switch(stage) {
-            case STAGE_BABY:
-                depth = 2.0f;
-                break;
-            case STAGE_TEEN:
-                depth = 8.0f;
-                break;
-            case STAGE_YOUNG:
-                depth = 12.0f;
-                break;
-            case STAGE_ADULT:
-            default:
-                depth = 16.0f;
-                break;
-        }
-
-        AABB boundingBox = new AABB(
-                -width / 2, 0, -depth / 2,
-                width / 2, height, depth / 2
-        );
-
-        float modelOffsetY;
-        if (this.isFlying()) {
-            switch(this.getGrowthStage()) {
-                case STAGE_BABY:
-                    modelOffsetY = 3.0f;
-                    break;
-                case STAGE_TEEN:
-                    modelOffsetY = 6.0f;
-                    break;
-                case STAGE_YOUNG:
-                    modelOffsetY = 14.0f;
-                    break;
-                case STAGE_ADULT:
-                default:
-                    modelOffsetY = 18.0f;
-                    break;
-            }
-        } else {
-            modelOffsetY = 0.0f;
-        }
-
-        return boundingBox.move(this.getX(), this.getY() + modelOffsetY, this.getZ());
+        public String getPartName() { return partName; }
     }
 
     public IceDragonEntity(EntityType<? extends Animal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.moveControl = new FlyingMoveControl(this, 20, true);
-        this.setCanFly(true);
-
-        // Принудительно устанавливаем взрослую стадию при создании
-        this.setGrowthStage(STAGE_ADULT);
-        this.setAge(GROWTH_INTERVAL * 3);
-
+        this.setNoGravity(true);
         if (!pLevel.isClientSide()) {
             this.generateRandomName(this.random);
         }
-
+        this.initDragonParts();
         this.refreshDimensions();
     }
 
+    private void initDragonParts() {
+        float[][] sizes = getPartSizesForStage(this.getGrowthStage());
+        dragonParts = new DragonPart[10];
+        dragonParts[PART_HEAD] = new DragonPart(this, "head", sizes[PART_HEAD][0], sizes[PART_HEAD][1], DAMAGE_MULTIPLIERS[PART_HEAD]);
+        dragonParts[PART_BODY] = new DragonPart(this, "body", sizes[PART_BODY][0], sizes[PART_BODY][1], DAMAGE_MULTIPLIERS[PART_BODY]);
+        dragonParts[PART_NECK] = new DragonPart(this, "neck", sizes[PART_NECK][0], sizes[PART_NECK][1], DAMAGE_MULTIPLIERS[PART_NECK]);
+        dragonParts[PART_TAIL] = new DragonPart(this, "tail", sizes[PART_TAIL][0], sizes[PART_TAIL][1], DAMAGE_MULTIPLIERS[PART_TAIL]);
+        dragonParts[PART_LEFT_WING] = new DragonPart(this, "left_wing", sizes[PART_LEFT_WING][0], sizes[PART_LEFT_WING][1], DAMAGE_MULTIPLIERS[PART_LEFT_WING]);
+        dragonParts[PART_RIGHT_WING] = new DragonPart(this, "right_wing", sizes[PART_RIGHT_WING][0], sizes[PART_RIGHT_WING][1], DAMAGE_MULTIPLIERS[PART_RIGHT_WING]);
+        dragonParts[PART_LEFT_LEG_FRONT] = new DragonPart(this, "left_leg_front", sizes[PART_LEFT_LEG_FRONT][0], sizes[PART_LEFT_LEG_FRONT][1], DAMAGE_MULTIPLIERS[PART_LEFT_LEG_FRONT]);
+        dragonParts[PART_RIGHT_LEG_FRONT] = new DragonPart(this, "right_leg_front", sizes[PART_RIGHT_LEG_FRONT][0], sizes[PART_RIGHT_LEG_FRONT][1], DAMAGE_MULTIPLIERS[PART_RIGHT_LEG_FRONT]);
+        dragonParts[PART_LEFT_LEG_BACK] = new DragonPart(this, "left_leg_back", sizes[PART_LEFT_LEG_BACK][0], sizes[PART_LEFT_LEG_BACK][1], DAMAGE_MULTIPLIERS[PART_LEFT_LEG_BACK]);
+        dragonParts[PART_RIGHT_LEG_BACK] = new DragonPart(this, "right_leg_back", sizes[PART_RIGHT_LEG_BACK][0], sizes[PART_RIGHT_LEG_BACK][1], DAMAGE_MULTIPLIERS[PART_RIGHT_LEG_BACK]);
+    }
+
+    private float[][] getPartSizesForStage(int stage) {
+        float[][] sizes = new float[10][2];
+        float scale = this.isFemale() ? 1.1f : 1.0f;
+
+        switch(stage) {
+            case STAGE_BABY:
+                sizes[PART_HEAD] = new float[]{0.6f, 0.6f};
+                sizes[PART_BODY] = new float[]{0.8f, 1.2f};
+                sizes[PART_NECK] = new float[]{0.4f, 0.8f};
+                sizes[PART_TAIL] = new float[]{0.3f, 1.2f};
+                sizes[PART_LEFT_WING] = new float[]{1.0f, 0.2f};
+                sizes[PART_RIGHT_WING] = new float[]{1.0f, 0.2f};
+                sizes[PART_LEFT_LEG_FRONT] = new float[]{0.3f, 0.5f};
+                sizes[PART_RIGHT_LEG_FRONT] = new float[]{0.3f, 0.5f};
+                sizes[PART_LEFT_LEG_BACK] = new float[]{0.3f, 0.5f};
+                sizes[PART_RIGHT_LEG_BACK] = new float[]{0.3f, 0.5f};
+                break;
+            case STAGE_TEEN:
+                sizes[PART_HEAD] = new float[]{2.0f, 2.0f};
+                sizes[PART_BODY] = new float[]{3.0f, 4.0f};
+                sizes[PART_NECK] = new float[]{1.5f, 3.0f};
+                sizes[PART_TAIL] = new float[]{1.0f, 5.0f};
+                sizes[PART_LEFT_WING] = new float[]{4.0f, 1.0f};
+                sizes[PART_RIGHT_WING] = new float[]{4.0f, 1.0f};
+                sizes[PART_LEFT_LEG_FRONT] = new float[]{1.0f, 2.0f};
+                sizes[PART_RIGHT_LEG_FRONT] = new float[]{1.0f, 2.0f};
+                sizes[PART_LEFT_LEG_BACK] = new float[]{1.0f, 2.0f};
+                sizes[PART_RIGHT_LEG_BACK] = new float[]{1.0f, 2.0f};
+                break;
+            case STAGE_YOUNG:
+                sizes[PART_HEAD] = new float[]{2.5f, 2.5f};
+                sizes[PART_BODY] = new float[]{3.5f, 5.0f};
+                sizes[PART_NECK] = new float[]{1.8f, 3.5f};
+                sizes[PART_TAIL] = new float[]{1.3f, 6.0f};
+                sizes[PART_LEFT_WING] = new float[]{5.0f, 1.2f};
+                sizes[PART_RIGHT_WING] = new float[]{5.0f, 1.2f};
+                sizes[PART_LEFT_LEG_FRONT] = new float[]{1.2f, 2.5f};
+                sizes[PART_RIGHT_LEG_FRONT] = new float[]{1.2f, 2.5f};
+                sizes[PART_LEFT_LEG_BACK] = new float[]{1.2f, 2.5f};
+                sizes[PART_RIGHT_LEG_BACK] = new float[]{1.2f, 2.5f};
+                break;
+            default:
+                sizes[PART_HEAD] = new float[]{3.0f * scale, 3.0f * scale};
+                sizes[PART_BODY] = new float[]{4.0f * scale, 6.0f * scale};
+                sizes[PART_NECK] = new float[]{2.0f * scale, 4.0f * scale};
+                sizes[PART_TAIL] = new float[]{1.5f * scale, 7.0f * scale};
+                sizes[PART_LEFT_WING] = new float[]{6.0f * scale, 1.5f * scale};
+                sizes[PART_RIGHT_WING] = new float[]{6.0f * scale, 1.5f * scale};
+                sizes[PART_LEFT_LEG_FRONT] = new float[]{1.5f * scale, 3.0f * scale};
+                sizes[PART_RIGHT_LEG_FRONT] = new float[]{1.5f * scale, 3.0f * scale};
+                sizes[PART_LEFT_LEG_BACK] = new float[]{1.5f * scale, 3.0f * scale};
+                sizes[PART_RIGHT_LEG_BACK] = new float[]{1.5f * scale, 3.0f * scale};
+                break;
+        }
+        return sizes;
+    }
+
+    @Override
+    public boolean isMultipartEntity() { return true; }
+
+    @Override
+    public PartEntity<?>[] getParts() { return dragonParts; }
+
+    @Override
+    public EntityDimensions getDimensions(Pose pose) {
+        int stage = this.getGrowthStage();
+        float scale = this.isFemale() ? 1.1f : 1.0f;
+        switch(stage) {
+            case STAGE_BABY: return EntityDimensions.scalable(0.8f * scale, 1.2f * scale);
+            case STAGE_TEEN: return EntityDimensions.scalable(3.0f * scale, 4.0f * scale);
+            case STAGE_YOUNG: return EntityDimensions.scalable(3.5f * scale, 5.0f * scale);
+            default: return EntityDimensions.scalable(4.0f * scale, 6.0f * scale);
+        }
+    }
+
+    @Override
+    protected AABB makeBoundingBox() {
+        EntityDimensions dims = this.getDimensions(this.getPose());
+        return new AABB(-dims.width/2, 0, -dims.width/2, dims.width/2, dims.height, dims.width/2).move(this.getX(), this.getY(), this.getZ());
+    }
+
+    private void updatePartPositions() {
+        if (dragonParts == null || this.level().isClientSide) return;
+
+        Vec3 rootPos = this.position();
+        float yaw = this.getYRot();
+        float pitch = this.getXRot();
+
+        float scale = this.isFemale() ? 1.1f : 1.0f;
+        float stageScale = 1.0f;
+        switch(this.getGrowthStage()) {
+            case STAGE_BABY: stageScale = 0.3f; break;
+            case STAGE_TEEN: stageScale = 0.7f; break;
+            case STAGE_YOUNG: stageScale = 0.9f; break;
+            default: stageScale = 1.0f;
+        }
+        scale *= stageScale;
+
+        double headX = rootPos.x + Math.sin(Math.toRadians(yaw)) * 1.5 * scale;
+        double headZ = rootPos.z - Math.cos(Math.toRadians(yaw)) * 1.5 * scale;
+        double headY = rootPos.y + 1.0 * scale;
+        dragonParts[PART_HEAD].setPos(headX, headY, headZ);
+        dragonParts[PART_HEAD].setYRot(yaw);
+
+        double neckX = rootPos.x + Math.sin(Math.toRadians(yaw)) * 1.0 * scale;
+        double neckZ = rootPos.z - Math.cos(Math.toRadians(yaw)) * 1.0 * scale;
+        double neckY = rootPos.y + 0.8 * scale;
+        dragonParts[PART_NECK].setPos(neckX, neckY, neckZ);
+        dragonParts[PART_NECK].setYRot(yaw);
+
+        dragonParts[PART_BODY].setPos(rootPos.x, rootPos.y + 0.5 * scale, rootPos.z);
+        dragonParts[PART_BODY].setYRot(yaw);
+
+        double tailX = rootPos.x - Math.sin(Math.toRadians(yaw)) * 2.0 * scale;
+        double tailZ = rootPos.z + Math.cos(Math.toRadians(yaw)) * 2.0 * scale;
+        dragonParts[PART_TAIL].setPos(tailX, rootPos.y + 0.3 * scale, tailZ);
+        dragonParts[PART_TAIL].setYRot(yaw + 180);
+
+        double leftWingX = rootPos.x + Math.cos(Math.toRadians(yaw)) * 1.5 * scale;
+        double leftWingZ = rootPos.z + Math.sin(Math.toRadians(yaw)) * 1.5 * scale;
+        dragonParts[PART_LEFT_WING].setPos(leftWingX, rootPos.y + 0.8 * scale, leftWingZ);
+        dragonParts[PART_LEFT_WING].setYRot(yaw - 90);
+
+        double rightWingX = rootPos.x - Math.cos(Math.toRadians(yaw)) * 1.5 * scale;
+        double rightWingZ = rootPos.z - Math.sin(Math.toRadians(yaw)) * 1.5 * scale;
+        dragonParts[PART_RIGHT_WING].setPos(rightWingX, rootPos.y + 0.8 * scale, rightWingZ);
+        dragonParts[PART_RIGHT_WING].setYRot(yaw + 90);
+
+        double leftFrontLegX = rootPos.x + Math.cos(Math.toRadians(yaw)) * 0.8 * scale;
+        double leftFrontLegZ = rootPos.z + Math.sin(Math.toRadians(yaw)) * 0.8 * scale;
+        dragonParts[PART_LEFT_LEG_FRONT].setPos(leftFrontLegX, rootPos.y, leftFrontLegZ);
+        dragonParts[PART_LEFT_LEG_FRONT].setYRot(yaw);
+
+        double rightFrontLegX = rootPos.x - Math.cos(Math.toRadians(yaw)) * 0.8 * scale;
+        double rightFrontLegZ = rootPos.z - Math.sin(Math.toRadians(yaw)) * 0.8 * scale;
+        dragonParts[PART_RIGHT_LEG_FRONT].setPos(rightFrontLegX, rootPos.y, rightFrontLegZ);
+        dragonParts[PART_RIGHT_LEG_FRONT].setYRot(yaw);
+
+        double leftBackLegX = rootPos.x + Math.cos(Math.toRadians(yaw)) * 1.2 * scale;
+        double leftBackLegZ = rootPos.z + Math.sin(Math.toRadians(yaw)) * 1.2 * scale;
+        dragonParts[PART_LEFT_LEG_BACK].setPos(leftBackLegX, rootPos.y, leftBackLegZ);
+        dragonParts[PART_LEFT_LEG_BACK].setYRot(yaw);
+
+        double rightBackLegX = rootPos.x - Math.cos(Math.toRadians(yaw)) * 1.2 * scale;
+        double rightBackLegZ = rootPos.z - Math.sin(Math.toRadians(yaw)) * 1.2 * scale;
+        dragonParts[PART_RIGHT_LEG_BACK].setPos(rightBackLegX, rootPos.y, rightBackLegZ);
+        dragonParts[PART_RIGHT_LEG_BACK].setYRot(yaw);
+    }
 
     @Override
     public void setRemainingFireTicks(int ticks) {
@@ -240,79 +316,47 @@ public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
-        if (DATA_BABY.equals(key) || DATA_FEMALE.equals(key) || DATA_GROWTH_STAGE.equals(key)) {
+        if (DATA_FEMALE.equals(key) || DATA_GROWTH_STAGE.equals(key)) {
             this.refreshDimensions();
+            this.initDragonParts();
         }
         super.onSyncedDataUpdated(key);
     }
 
-    private void updatePartPositions() {
-        if (this.level().isClientSide) return;
-        // Логика позиционирования частей (если нужно)
-    }
-
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        if (source.getDirectEntity() instanceof Player player) {
-            if (!this.level().isClientSide()) {
-                boolean isRussian = isPlayerRussian(player);
-                String message = getRandomHurtMessage(isRussian);
-                String dragonName = this.getDragonName();
-
-                String prefix;
-                if (isRussian) {
-                    prefix = "🐉 " + dragonName + " восклицает: ";
-                } else {
-                    prefix = "🐉 " + dragonName + " exclaims: ";
-                }
-
-                player.sendSystemMessage(Component.literal(prefix + message));
+        if (source.getDirectEntity() instanceof Player player && !this.level().isClientSide()) {
+            if (this.random.nextInt(3) == 0) {
+                player.sendSystemMessage(Component.literal("🐉 " + this.getDragonName() + " exclaims: " + getRandomHurtMessage()));
             }
         }
-
-        // Твоя существующая логика урона от огня
-        if (source.is(DamageTypeTags.IS_FIRE)) {
-            amount *= 1.5f;
-        }
-
+        if (source.is(DamageTypeTags.IS_FIRE)) amount *= 1.5f;
         if (source.getDirectEntity() instanceof LivingEntity attacker) {
             ItemStack weapon = attacker.getMainHandItem();
             if (weapon.isEnchanted()) {
-                if (weapon.getEnchantmentLevel(Enchantments.FIRE_ASPECT) > 0) {
-                    amount *= 1.3f;
-                }
-                if (weapon.getEnchantmentLevel(Enchantments.FLAMING_ARROWS) > 0) {
-                    amount *= 1.3f;
-                }
+                if (weapon.getEnchantmentLevel(Enchantments.FIRE_ASPECT) > 0) amount *= 1.3f;
+                if (weapon.getEnchantmentLevel(Enchantments.FLAMING_ARROWS) > 0) amount *= 1.3f;
             }
         }
-
         return super.hurt(source, amount);
     }
 
     @Override
     protected void registerGoals() {
-        super.registerGoals();
-
         this.goalSelector.addGoal(5, new IceDragonGoal.FlyWanderGoal(this));
         this.goalSelector.addGoal(4, new IceDragonGoal.TakeOffGoal(this));
         this.goalSelector.addGoal(3, new IceDragonGoal.LandGoal(this));
-
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
-
-        // Атакует только в ответ на удар
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, true));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
-
         this.goalSelector.addGoal(0, new FloatGoal(this));
     }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(DATA_BABY, false);
         this.entityData.define(DATA_VARIANT, 0);
         this.entityData.define(DATA_EYE_VARIANT, 0);
         this.entityData.define(DATA_FLYING, false);
@@ -320,18 +364,18 @@ public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
         this.entityData.define(DATA_LANDING, false);
         this.entityData.define(DATA_FEMALE, false);
         this.entityData.define(DATA_AGE, 0);
-        this.entityData.define(DATA_GROWTH_STAGE, STAGE_ADULT);
+        this.entityData.define(DATA_GROWTH_STAGE, STAGE_BABY);
         this.entityData.define(DATA_ATTACKING, false);
         this.entityData.define(DATA_NAME, "");
     }
 
     @Override
     protected PathNavigation createNavigation(Level level) {
-        FlyingPathNavigation flyingPathNavigation = new FlyingPathNavigation(this, level);
-        flyingPathNavigation.setCanOpenDoors(false);
-        flyingPathNavigation.setCanFloat(true);
-        flyingPathNavigation.setCanPassDoors(true);
-        return flyingPathNavigation;
+        FlyingPathNavigation nav = new FlyingPathNavigation(this, level);
+        nav.setCanOpenDoors(false);
+        nav.setCanFloat(true);
+        nav.setCanPassDoors(true);
+        return nav;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -346,57 +390,25 @@ public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        controllerRegistrar.add(new AnimationController<>(this, "MainController", 5, event -> {
-            if (this.isAttacking()) {
-                return event.setAndContinue(ATTACK_ANIMATION);
-            }
-
-            if (this.isLanding()) {
-                return event.setAndContinue(LAND_ANIMATION);
-            }
-
-            if (this.getGrowthStage() == STAGE_BABY) {
-                if (event.isMoving()) {
-                    return event.setAndContinue(WALK_ANIMATION);
-                } else {
-                    return event.setAndContinue(IDLE_ANIMATION);
-                }
-            }
-
-            if (this.isTakingOff()) {
-                return event.setAndContinue(FLIGHT_START_ANIMATION);
-            }
-
+    public void registerControllers(AnimatableManager.ControllerRegistrar registrar) {
+        registrar.add(new AnimationController<>(this, "MainController", 5, event -> {
+            if (this.isAttacking()) return event.setAndContinue(ATTACK_ANIMATION);
+            if (this.isLanding()) return event.setAndContinue(LAND_ANIMATION);
+            if (this.getGrowthStage() == STAGE_BABY) return event.setAndContinue(event.isMoving() ? WALK_ANIMATION : IDLE_ANIMATION);
+            if (this.isTakingOff()) return event.setAndContinue(FLIGHT_START_ANIMATION);
             if (this.isFlying()) {
                 Vec3 movement = this.getDeltaMovement();
-                double horizontalSpeed = movement.horizontalDistance();
-                double verticalSpeed = Math.abs(movement.y);
-
-                if (horizontalSpeed > 0.1 && verticalSpeed < 0.3) {
-                    return event.setAndContinue(FLIGHT_ANIMATION);
-                } else {
-                    return event.setAndContinue(FLIGHT_IDLE_ANIMATION);
-                }
-            } else {
-                if (event.isMoving()) {
-                    return event.setAndContinue(WALK_ANIMATION);
-                } else {
-                    return event.setAndContinue(IDLE_ANIMATION);
-                }
+                return event.setAndContinue(movement.horizontalDistance() > 0.1 && Math.abs(movement.y) < 0.3 ? FLIGHT_ANIMATION : FLIGHT_IDLE_ANIMATION);
             }
+            return event.setAndContinue(event.isMoving() ? WALK_ANIMATION : IDLE_ANIMATION);
         }));
     }
 
     @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.cache;
-    }
+    public AnimatableInstanceCache getAnimatableInstanceCache() { return this.cache; }
 
     @Override
-    public boolean onGround() {
-        return !this.isFlying() && super.onGround();
-    }
+    public boolean onGround() { return !this.isFlying() && super.onGround(); }
 
     @Override
     public void travel(Vec3 travelVector) {
@@ -404,7 +416,6 @@ public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
             this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
             return;
         }
-
         if (this.isFlying()) {
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.95D));
@@ -413,113 +424,52 @@ public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
         }
     }
 
-    // Геттеры и сеттеры
-    public void setFlying(boolean flying) {
-        this.entityData.set(DATA_FLYING, flying);
-        this.setCanFly(flying);
-    }
-
-    public boolean isTakingOff() {
-        return this.entityData.get(DATA_TAKEOFF);
-    }
-
+    public void setFlying(boolean flying) { this.entityData.set(DATA_FLYING, flying); }
+    public boolean isTakingOff() { return this.entityData.get(DATA_TAKEOFF); }
     public void setTakingOff(boolean takingOff) {
         this.entityData.set(DATA_TAKEOFF, takingOff);
-        if (takingOff) {
-            this.takeoffAnimationTimer = 40;
-        }
+        if (takingOff) this.takeoffAnimationTimer = 40;
     }
-
-    public boolean isLanding() {
-        return this.entityData.get(DATA_LANDING);
-    }
-
+    public boolean isLanding() { return this.entityData.get(DATA_LANDING); }
     public void setLanding(boolean landing) {
         this.entityData.set(DATA_LANDING, landing);
-        if (landing) {
-            this.landingAnimationTimer = 40;
-        }
+        if (landing) this.landingAnimationTimer = 40;
     }
-
-    public void setCanFly(boolean canFly) {
-        this.setNoGravity(canFly);
-    }
-
-    public int getVariant() {
-        return this.entityData.get(DATA_VARIANT);
-    }
-
-    public void setVariant(int variant) {
-        this.entityData.set(DATA_VARIANT, variant);
-    }
-
-    public boolean isFemale() {
-        return this.entityData.get(DATA_FEMALE);
-    }
-
+    public int getVariant() { return this.entityData.get(DATA_VARIANT); }
+    public void setVariant(int variant) { this.entityData.set(DATA_VARIANT, variant); }
+    public boolean isFemale() { return this.entityData.get(DATA_FEMALE); }
     public void setFemale(boolean female) {
         this.entityData.set(DATA_FEMALE, female);
         this.refreshDimensions();
+        this.initDragonParts();
     }
-
-    public boolean isBaby() {
-        return this.entityData.get(DATA_BABY);
-    }
-
-    public void setBaby(boolean baby) {
-        this.entityData.set(DATA_BABY, baby);
-        this.refreshDimensions();
-    }
-
-    public int getAge() {
-        return this.entityData.get(DATA_AGE);
-    }
-
+    public int getAge() { return this.entityData.get(DATA_AGE); }
     public void setAge(int age) {
         this.entityData.set(DATA_AGE, age);
         this.updateGrowthStage();
     }
-
-    public int getGrowthStage() {
-        return this.entityData.get(DATA_GROWTH_STAGE);
-    }
-
+    public int getGrowthStage() { return this.entityData.get(DATA_GROWTH_STAGE); }
     private void setGrowthStage(int stage) {
         this.entityData.set(DATA_GROWTH_STAGE, stage);
         this.refreshDimensions();
+        this.initDragonParts();
     }
-
-    public boolean isAttacking() {
-        return this.entityData.get(DATA_ATTACKING);
-    }
-
-    public void setAttacking(boolean attacking) {
-        this.entityData.set(DATA_ATTACKING, attacking);
-    }
-
+    public boolean isAttacking() { return this.entityData.get(DATA_ATTACKING); }
+    public void setAttacking(boolean attacking) { this.entityData.set(DATA_ATTACKING, attacking); }
     public void setAttackTimer(int timer) {
         this.attackTimer = timer;
         this.setAttacking(timer > 0);
     }
-
-    public void useIceBreath(LivingEntity target) {
-        if (this.getGrowthStage() >= STAGE_TEEN) {
-            // Логика ледяного дыхания для обычных драконов
-        }
-    }
+    public boolean isFlying() { return this.entityData.get(DATA_FLYING); }
+    public int getEyeVariant() { return this.entityData.get(DATA_EYE_VARIANT); }
+    public void setEyeVariant(int variant) { this.entityData.set(DATA_EYE_VARIANT, variant); }
 
     private void updateGrowthStage() {
         int age = this.getAge();
-        if (age < GROWTH_INTERVAL) {
-            this.setGrowthStage(STAGE_BABY);
-        } else if (age < GROWTH_INTERVAL * 2) {
-            this.setGrowthStage(STAGE_TEEN);
-        } else if (age < GROWTH_INTERVAL * 3) {
-            this.setGrowthStage(STAGE_YOUNG);
-        } else {
-            this.setGrowthStage(STAGE_ADULT);
-        }
-        this.refreshDimensions();
+        if (age < GROWTH_INTERVAL) this.setGrowthStage(STAGE_BABY);
+        else if (age < GROWTH_INTERVAL * 2) this.setGrowthStage(STAGE_TEEN);
+        else if (age < GROWTH_INTERVAL * 3) this.setGrowthStage(STAGE_YOUNG);
+        else this.setGrowthStage(STAGE_ADULT);
     }
 
     @Override
@@ -529,7 +479,6 @@ public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
         compound.putInt("EyeVariant", this.getEyeVariant());
         compound.putBoolean("Flying", this.isFlying());
         compound.putBoolean("Female", this.isFemale());
-        compound.putBoolean("IsBaby", this.isBaby());
         compound.putInt("Age", this.getAge());
         compound.putInt("FurDropTimer", this.furDropTimer);
         compound.putString("DragonName", this.getDragonName());
@@ -538,400 +487,166 @@ public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
-        if (compound.contains("Variant")) {
-            this.setVariant(compound.getInt("Variant"));
-        }
-        if (compound.contains("EyeVariant")) {
-            this.setEyeVariant(compound.getInt("EyeVariant"));
-        }
-        if (compound.contains("Flying")) {
-            this.setFlying(compound.getBoolean("Flying"));
-        }
-        if (compound.contains("Female")) {
-            this.setFemale(compound.getBoolean("Female"));
-        }
-        if (compound.contains("IsBaby")) {
-            this.setBaby(compound.getBoolean("IsBaby"));
-        }
-
-        if (compound.contains("Age")) {
-            this.setAge(compound.getInt("Age"));
-        } else {
-            this.setGrowthStage(STAGE_ADULT);
-            this.setAge(GROWTH_INTERVAL * 3);
-        }
-
-        if (compound.contains("FurDropTimer")) {
-            this.furDropTimer = compound.getInt("FurDropTimer"); // Загружаем таймер
-        }
-
-        if (compound.contains("DragonName")) {
-            this.setDragonName(compound.getString("DragonName"));
-        } else {
-            // Генерируем имя если его нет
-            this.generateRandomName(this.random);
-        }
+        if (compound.contains("Variant")) this.setVariant(compound.getInt("Variant"));
+        if (compound.contains("EyeVariant")) this.setEyeVariant(compound.getInt("EyeVariant"));
+        if (compound.contains("Flying")) this.setFlying(compound.getBoolean("Flying"));
+        if (compound.contains("Female")) this.setFemale(compound.getBoolean("Female"));
+        if (compound.contains("Age")) this.setAge(compound.getInt("Age"));
+        if (compound.contains("FurDropTimer")) this.furDropTimer = compound.getInt("FurDropTimer");
+        if (compound.contains("DragonName")) this.setDragonName(compound.getString("DragonName"));
+        else this.generateRandomName(this.random);
     }
 
     @Nullable
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
-        // Убираем проверку на BREEDING или расширяем условия
         this.setVariant(level.getRandom().nextInt(3));
         this.setEyeVariant(level.getRandom().nextInt(5));
         this.setFemale(level.getRandom().nextBoolean());
 
-        // Всегда взрослая стадия
-        this.setGrowthStage(STAGE_ADULT);
-        this.setAge(GROWTH_INTERVAL * 3);
+        int randomStage = level.getRandom().nextInt(4);
+        int age = randomStage * GROWTH_INTERVAL;
+        this.setAge(age);
 
-        // Генерируем имя
-        generateRandomName(level.getRandom());
-
-        System.out.println("SPAWN: Dragon spawned - Stage: " + this.getGrowthStage() +
-                ", Name: " + this.getDragonName() +
-                ", SpawnType: " + reason);
-
+        this.generateRandomName(level.getRandom());
         return super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
     }
 
     private void generateRandomName(RandomSource random) {
-        boolean isRussian = isWorldRussian();
-        boolean isFemale = this.isFemale();
-
-        String name;
-        if (isRussian) {
-            if (isFemale) {
-                name = FEMALE_SCANDINAVIAN_NAMES[random.nextInt(FEMALE_SCANDINAVIAN_NAMES.length)];
-            } else {
-                name = MALE_SCANDINAVIAN_NAMES[random.nextInt(MALE_SCANDINAVIAN_NAMES.length)];
-            }
-        } else {
-            if (isFemale) {
-                name = FEMALE_ENGLISH_NAMES[random.nextInt(FEMALE_ENGLISH_NAMES.length)];
-            } else {
-                name = MALE_ENGLISH_NAMES[random.nextInt(MALE_ENGLISH_NAMES.length)];
-            }
-        }
-
-        this.setDragonName(name);
-    }
-
-    private boolean isWorldRussian() {
-        // Простая проверка языка мира
-        try {
-            if (this.level().isClientSide()) {
-                return net.minecraft.client.Minecraft.getInstance().options.languageCode.startsWith("ru");
-            } else {
-                // Для сервера можно использовать системные настройки
-                return System.getProperty("user.language", "en").startsWith("ru");
-            }
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-
-    @Override
-    public @Nullable AgeableMob getBreedOffspring(ServerLevel pLevel, AgeableMob pOtherParent) {
-        return null;
+        String[] names = {"Fafnir", "Jormungand", "Fenrir", "Nidhogg", "Grendel", "Hraesvelgr",
+                "Heidrun", "Ratatosk", "Gullinbursti", "Hrimfaxi", "Hel", "Skadi",
+                "Freya", "Sigunn", "Brynhild", "Gudrun", "Astrid", "Ingrid", "Sigrid", "Ragnhild"};
+        this.setDragonName(names[random.nextInt(names.length)]);
     }
 
     @Override
-    public boolean canBreed() {
-        return false;
-    }
-
+    public @Nullable AgeableMob getBreedOffspring(ServerLevel pLevel, AgeableMob pOtherParent) { return null; }
     @Override
-    public boolean isFood(ItemStack stack) {
-        return stack.getItem() == Items.COD || stack.getItem() == Items.SALMON;
-    }
-
+    public boolean canBreed() { return false; }
     @Override
-    public boolean canFallInLove() {
-        return super.canFallInLove() && this.getGrowthStage() >= STAGE_ADULT;
-    }
+    public boolean isFood(ItemStack stack) { return stack.getItem() == Items.COD || stack.getItem() == Items.SALMON; }
 
     @Override
     public void tick() {
         super.tick();
+        this.updatePartPositions();
 
-        updatePartPositions();
+        if (!this.level().isClientSide()) {
+            if (this.tickCount % 400 == 0 && this.random.nextInt(3) == 0) this.playIdleSound();
 
-        if (!this.level().isClientSide() && this.tickCount % 400 == 0 && this.random.nextInt(3) == 0) {
-            this.playIdleSound();
-        }
-
-        // ТАЙМЕР СБРОСА МЕХА - каждые 10 минут
-        if (!this.level().isClientSide() && this.getGrowthStage() >= STAGE_TEEN) {
-            this.furDropTimer++;
-            if (this.furDropTimer >= FUR_DROP_INTERVAL) {
-                this.dropFur();
-                this.furDropTimer = 0;
-
-                // Дебаг сообщение (можно убрать потом)
-                if (this.tickCount % 1200 == 0) { // Каждую минуту показываем прогресс
-                    int minutesLeft = (FUR_DROP_INTERVAL - this.furDropTimer) / 1200;
-                    System.out.println("Dragon will drop fur in " + minutesLeft + " minutes");
+            if (this.getGrowthStage() >= STAGE_TEEN) {
+                this.furDropTimer++;
+                if (this.furDropTimer >= FUR_DROP_INTERVAL) {
+                    this.spawnAtLocation(ModItems.FUR_ICE_DRAGON.get(), 1);
+                    this.furDropTimer = 0;
                 }
             }
-        }
 
-        if (this.takeoffAnimationTimer > 0) {
-            this.takeoffAnimationTimer--;
-            if (this.takeoffAnimationTimer <= 0 && this.isTakingOff()) {
-                this.setTakingOff(false);
-                this.setFlying(true);
+            if (this.takeoffAnimationTimer > 0) {
+                this.takeoffAnimationTimer--;
+                if (this.takeoffAnimationTimer <= 0 && this.isTakingOff()) {
+                    this.setTakingOff(false);
+                    this.setFlying(true);
+                }
             }
-        }
 
-        if (this.landingAnimationTimer > 0) {
-            this.landingAnimationTimer--;
-            if (this.landingAnimationTimer <= 0 && this.isLanding()) {
-                this.setLanding(false);
-                this.setFlying(false);
+            if (this.landingAnimationTimer > 0) {
+                this.landingAnimationTimer--;
+                if (this.landingAnimationTimer <= 0 && this.isLanding()) {
+                    this.setLanding(false);
+                    this.setFlying(false);
+                }
             }
-        }
 
-        if (this.getGrowthStage() == STAGE_BABY) {
-            if (this.isFlying() || this.isTakingOff() || this.isLanding()) {
+            if (this.getGrowthStage() == STAGE_BABY && (this.isFlying() || this.isTakingOff() || this.isLanding())) {
                 this.setFlying(false);
                 this.setTakingOff(false);
                 this.setLanding(false);
-                this.setNoGravity(false);
+            }
+
+            if (this.tickCount % 20 == 0 && this.getGrowthStage() < STAGE_ADULT) {
+                this.setAge(this.getAge() + 1);
+            }
+
+            if (this.attackTimer > 0) {
+                this.attackTimer--;
+                if (this.attackTimer <= 0) this.setAttacking(false);
             }
         }
-
-        if (this.tickCount % 20 == 0 && this.getGrowthStage() < STAGE_ADULT) {
-            this.growthTimer++;
-            if (this.growthTimer >= 60) {
-                this.growthTimer = 0;
-                this.setAge(this.getAge() + 20 * 60);
-            }
-        }
-
-        if (this.attackTimer > 0) {
-            this.attackTimer--;
-            if (this.attackTimer <= 0) {
-                this.setAttacking(false);
-            }
-        }
-    }
-
-
-    @Override
-    public boolean isFlying() {
-        return this.entityData.get(DATA_FLYING);
-    }
-
-    public int getEyeVariant() {
-        return this.entityData.get(DATA_EYE_VARIANT);
-    }
-
-    public void setEyeVariant(int eyeVariant) {
-        this.entityData.set(DATA_EYE_VARIANT, eyeVariant);
     }
 
     @Override
-    public boolean shouldRenderAtSqrDistance(double distance) {
-        double maxDistance = 1024.0;
-        return distance < maxDistance * maxDistance;
-    }
-
-    public boolean isAlwaysRenderNameTag() {
-        return true;
-    }
+    public boolean shouldRenderAtSqrDistance(double distance) { return distance < 1048576.0; }
+    public boolean isAlwaysRenderNameTag() { return true; }
 
     @Override
     protected void dropCustomDeathLoot(DamageSource source, int lootingLevel, boolean recentlyHit) {
         super.dropCustomDeathLoot(source, lootingLevel, recentlyHit);
-
-        int furCount = 4 + this.random.nextInt(12);
-        this.spawnAtLocation(ModItems.FUR_ICE_DRAGON.get(), furCount);
-
+        this.spawnAtLocation(ModItems.FUR_ICE_DRAGON.get(), 4 + this.random.nextInt(12));
         this.spawnAtLocation(ModItems.HEART_ICE_DRAGON.get());
-    }
-
-    private int furDropTimer = 0;
-    private static final int FUR_DROP_INTERVAL = 10 * 60 * 20; // 10 минут в тиках (10 * 60 * 20)
-    public void dropFur() {
-        if (!this.level().isClientSide()) {
-            // Сбрасываем 1 единицу меха
-            this.spawnAtLocation(ModItems.FUR_ICE_DRAGON.get(), 1);
-            System.out.println("Dragon dropped fur at position: " + this.blockPosition());
-        }
     }
 
     @Override
     protected void dropExperience() {
         if (this.level() instanceof ServerLevel serverLevel) {
-            // Опыт: среднее между варденом (5) и эндер-драконом (500)
-            // Варден: 5 опыта, Эндер-дракон: 500 опыта, наше среднее: ~250
-            int experience = 250 + this.random.nextInt(30); // 250-300 опыта
-
-            ExperienceOrb.award(serverLevel, this.position(), experience);
-            System.out.println("Dragon dropped " + experience + " experience points");
+            ExperienceOrb.award(serverLevel, this.position(), 250 + this.random.nextInt(30));
         }
     }
 
-    private boolean isPlayerRussian(Player player) {
-        try {
-            // Для тестирования - всегда английский
-            return false;
-
-            // Или раскомментируй для реальной проверки:
-            // String systemLanguage = System.getProperty("user.language", "en");
-            // return systemLanguage.startsWith("ru");
-        } catch (Exception e) {
-            return false;
-        }
+    private String getRandomFeedingMessage() {
+        String[] messages = {"Thank you for the fish!", "Mmm, fresh fish!", "You're brave to approach so close!",
+                "This fish reminds me of the northern seas...", "Unexpected generosity!",
+                "How nice not to have to go looking for food..."};
+        return messages[this.random.nextInt(messages.length)];
     }
 
-
-
-    private String getRandomFeedingMessage(boolean isRussian) {
-        if (isRussian) {
-            String[] russianMessages = {
-                    "Спасибо за рыбу! Обычно я сам охочусь...",
-                    "Ммм, свежая рыбка! Как редко меня угощают!",
-                    "Ты смелый, что подошел так близко! Спасибо за угощение!",
-                    "Эта рыба напоминает мне о северных морях...",
-                    "Я не ожидал такой щедрости от двуногого!",
-                    "Хрум-хрум! Вкуснее, чем пойманная самостоятельно!",
-                    "Ты заслужил мое доверие, маленький друг!",
-                    "Рыбка! Я обожаю рыбку! Спасибо тебе!",
-                    "Как приятно, когда кто-то заботится обо мне...",
-                    "Этот запах свежей рыбы сводит меня с ума!"
-            };
-            return russianMessages[this.random.nextInt(russianMessages.length)];
-        } else {
-            String[] englishMessages = {
-                    "Thank you for the fish! Usually I have to go hunting for this...",
-                    "Mmm, fresh fish! I rarely get treated",
-                    "You're brave to approach so close! Thank you for the treat",
-                    "This fish reminds me of the northern seas...",
-                    "Unexpected generosity from a two-legged",
-                    "How nice not to have to go looking for food..."
-            };
-            return englishMessages[this.random.nextInt(englishMessages.length)];
-        }
+    private String getRandomHurtMessage() {
+        String[] messages = {"In a thousand years, no one has treated me like this!", "My years have taught me patience!",
+                "Even glaciers remember fewer grievances!", "At my age, such treatment is offensive!",
+                "I've seen civilizations, but this is new!", "My longevity is no reason for rudeness!"};
+        return messages[this.random.nextInt(messages.length)];
     }
 
     private void spawnHearts() {
         if (this.level().isClientSide()) {
             for (int i = 0; i < 5; i++) {
-                double x = this.getX() + (this.random.nextDouble() - 0.5) * 2.0;
-                double y = this.getY() + 1.0 + this.random.nextDouble() * 2.0;
-                double z = this.getZ() + (this.random.nextDouble() - 0.5) * 2.0;
-
-                this.level().addParticle(ParticleTypes.HEART, x, y, z, 0, 0.1, 0);
+                this.level().addParticle(ParticleTypes.HEART,
+                        this.getX() + (this.random.nextDouble() - 0.5) * 2.0,
+                        this.getY() + 1.0 + this.random.nextDouble() * 2.0,
+                        this.getZ() + (this.random.nextDouble() - 0.5) * 2.0, 0, 0.1, 0);
             }
         }
     }
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        ItemStack itemstack = player.getItemInHand(hand);
-
-        if (this.isFood(itemstack)) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (this.isFood(stack)) {
             if (!this.level().isClientSide()) {
-                boolean isRussian = isPlayerRussian(player);
-                String message = getRandomFeedingMessage(isRussian);
-                String dragonName = this.getDragonName();
-
-                // Разные префиксы для языков
-                String prefix;
-                if (isRussian) {
-                    prefix = "🐉 " + dragonName + " говорит: ";
-                } else {
-                    prefix = "🐉 " + dragonName + " says: ";
+                if (this.random.nextInt(2) == 0) {
+                    player.sendSystemMessage(Component.literal("🐉 " + this.getDragonName() + " says: " + getRandomFeedingMessage()));
                 }
-
-                player.sendSystemMessage(Component.literal(prefix + message));
-
-                spawnHearts();
-
-                if (!player.getAbilities().instabuild) {
-                    itemstack.shrink(1);
-                }
-
-                this.usePlayerItem(player, hand, itemstack);
+                this.spawnHearts();
+                if (!player.getAbilities().instabuild) stack.shrink(1);
+                this.usePlayerItem(player, hand, stack);
             }
             return InteractionResult.sidedSuccess(this.level().isClientSide());
         }
-
         return super.mobInteract(player, hand);
     }
 
-
-    private static final String[] MALE_SCANDINAVIAN_NAMES = {
-            "Фафнир", "Йормунганд", "Фенрир", "Нидхёгг", "Грендель",
-            "Хрёсвельг", "Хейдрун", "Рататоск", "Гулльинбурсти", "Хримфакси"
-    };
-
-    // Скандинавские имена для женских драконов
-    private static final String[] FEMALE_SCANDINAVIAN_NAMES = {
-            "Хель", "Скади", "Фрейя", "Сигунн", "Брюнхильд",
-            "Гудрун", "Астрид", "Ингрид", "Сигрид", "Рагнхильд"
-    };
-
-    // English versions
-    private static final String[] MALE_ENGLISH_NAMES = {
-            "Fafnir", "Jormungand", "Fenrir", "Nidhogg", "Grendel",
-            "Hraesvelgr", "Heidrun", "Ratatosk", "Gullinbursti", "Hrimfaxi"
-    };
-
-    private static final String[] FEMALE_ENGLISH_NAMES = {
-            "Hel", "Skadi", "Freya", "Sigunn", "Brynhild",
-            "Gudrun", "Astrid", "Ingrid", "Sigrid", "Ragnhild"
-    };
-
-    public String getDragonName() {
-        return this.entityData.get(DATA_NAME);
-    }
-
+    public String getDragonName() { return this.entityData.get(DATA_NAME); }
     public void setDragonName(String name) {
         this.entityData.set(DATA_NAME, name);
         this.setCustomName(Component.literal(name));
         this.setCustomNameVisible(true);
     }
 
-    private String getRandomHurtMessage(boolean isRussian) {
-        if (isRussian) {
-            String[] russianHurtMessages = {
-                    "За тысячу лет никто так со мной не обращался!",
-                    "Мои годы научили меня терпению, но ты испытываешь его!",
-                    "Даже ледники помнят меньше обид, чем я сейчас!",
-                    "В мои годы подобное обращение оскорбительно!",
-                    "Я видел цивилизации, но такой дерзости не припоминаю!",
-                    "Мое долгожитие не повод для грубости!",
-                    "За века я многое происходило, но такое впервые!",
-            };
-            return russianHurtMessages[this.random.nextInt(russianHurtMessages.length)];
-        } else {
-            String[] englishHurtMessages = {
-                    "In a thousand years, no one has treated me like this!",
-                    "My years have taught me patience, but you're testing it!",
-                    "Even glaciers remember fewer grievances than I do now!",
-                    "At my age, such treatment is offensive!",
-                    "I've seen civilizations, but I don't recall such audacity!",
-                    "My longevity is no reason for rudeness!",
-                    "Over the centuries, I've seen much, but this is new!",
-            };
-            return englishHurtMessages[this.random.nextInt(englishHurtMessages.length)];
-        }
-    }
-
     public void playIdleSound() {
         if (!this.level().isClientSide()) {
-            SoundEvent[] idleSounds = {
-                    ModSounds.DRAGON_IDLE1.get(),
-                    ModSounds.DRAGON_IDLE2.get(),
-                    ModSounds.DRAGON_IDLE3.get()
-            };
-            SoundEvent sound = idleSounds[this.random.nextInt(idleSounds.length)];
+            SoundEvent[] sounds = {ModSounds.DRAGON_IDLE1.get(), ModSounds.DRAGON_IDLE2.get(), ModSounds.DRAGON_IDLE3.get()};
             this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                    sound, this.getSoundSource(), 1.0F, 1.0F);
+                    sounds[this.random.nextInt(sounds.length)], this.getSoundSource(), 1.0F, 1.0F);
         }
     }
 
@@ -941,8 +656,4 @@ public class IceDragonEntity extends Animal implements GeoEntity, FlyingAnimal {
                     ModSounds.DRAGON_AGGRESSIVE_ROAR.get(), this.getSoundSource(), 1.5F, 1.0F);
         }
     }
-
-
-
-
 }

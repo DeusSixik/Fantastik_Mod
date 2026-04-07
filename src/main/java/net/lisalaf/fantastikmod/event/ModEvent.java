@@ -2,16 +2,24 @@ package net.lisalaf.fantastikmod.event;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.lisalaf.fantastikmod.block.ModBlocks;
+import net.lisalaf.fantastikmod.effect.ModEffects;
+import net.lisalaf.fantastikmod.entity.custom.BakenekoEntity;
 import net.lisalaf.fantastikmod.fantastikmod;
 import net.lisalaf.fantastikmod.item.BookHelper;
 import net.lisalaf.fantastikmod.item.ModItems;
 import net.lisalaf.fantastikmod.villager.ModVillagers;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.OutgoingChatMessage;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.village.VillagerTradesEvent;
@@ -186,6 +194,61 @@ public class ModEvent {
             net.lisalaf.fantastikmod.dialog.quest.QuestSystem.getActiveQuests()
                     .forEach((uuid, quest) -> {
                     });
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) return;
+
+        Player player = event.player;
+        ItemStack mainHand = player.getMainHandItem();
+        ItemStack offHand = player.getOffhandItem();
+
+        boolean hasCatnip = mainHand.getItem() == ModItems.CATNIP.get() ||
+                offHand.getItem() == ModItems.CATNIP.get() ||
+                mainHand.getItem() == ModItems.DRIED_CATNIP.get() ||
+                offHand.getItem() == ModItems.DRIED_CATNIP.get();
+
+        if (hasCatnip) {
+            for (Cat cat : player.level().getEntitiesOfClass(Cat.class,
+                    player.getBoundingBox().inflate(16))) {
+                cat.getNavigation().moveTo(player, 1.2);
+                cat.getLookControl().setLookAt(player, 30, 30);
+            }
+            for (BakenekoEntity bakeneko : player.level().getEntitiesOfClass(BakenekoEntity.class,
+                    player.getBoundingBox().inflate(16))) {
+                bakeneko.getNavigation().moveTo(player, 1.2);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+        Player player = event.getEntity();
+        ItemStack itemInHand = player.getItemInHand(event.getHand());
+        var target = event.getTarget();
+
+        if ((target instanceof Cat || target instanceof BakenekoEntity) &&
+                (itemInHand.getItem() == ModItems.CATNIP.get() ||
+                        itemInHand.getItem() == ModItems.DRIED_CATNIP.get())) {
+
+            if (!player.level().isClientSide && target instanceof LivingEntity living) {
+                living.addEffect(new MobEffectInstance(ModEffects.CATNIP_EFFECT.get(), 600, 0));
+                if (living instanceof BakenekoEntity bakeneko) {
+                    bakeneko.setTarget(null);
+                }
+                if (!player.isCreative()) {
+                    itemInHand.shrink(1);
+                }
+                for (int i = 0; i < 10; i++) {
+                    player.level().addParticle(ParticleTypes.HAPPY_VILLAGER,
+                            target.getX(), target.getY() + 0.5, target.getZ(),
+                            0, 0.1, 0);
+                }
+                target.playSound(SoundEvents.CAT_EAT, 1.0F, 1.0F);
+            }
+            event.setCanceled(true);
         }
     }
 }

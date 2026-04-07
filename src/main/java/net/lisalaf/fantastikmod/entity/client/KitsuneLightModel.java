@@ -11,13 +11,11 @@ public class KitsuneLightModel extends GeoModel<KitsuneLightEntity> {
 
     @Override
     public ResourceLocation getModelResource(KitsuneLightEntity entity) {
-        // ИСПРАВЛЕНО: новый метод вместо deprecated
         return new ResourceLocation("fantastikmod", "geo/kitsune_light.geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(KitsuneLightEntity entity) {
-        // Используем вариант из сущности для получения правильной текстуры
         int variant = entity.getVariant();
         return new ResourceLocation("fantastikmod",
                 "textures/entity/kitsune/kitsune_light_" + variant + ".png");
@@ -25,18 +23,14 @@ public class KitsuneLightModel extends GeoModel<KitsuneLightEntity> {
 
     @Override
     public ResourceLocation getAnimationResource(KitsuneLightEntity entity) {
-        // ИСПРАВЛЕНО: новый метод вместо deprecated
         return new ResourceLocation("fantastikmod", "animations/kitsune_light.animation.json");
     }
 
-    // Метод для получения текстуры глаз (для рендерера)
     public ResourceLocation getEyeTexture(KitsuneLightEntity entity) {
-        int eyeVariant = entity.getEyeVariant() % 7; // Используй getEyeVariant() вместо getVariant()
+        int eyeVariant = entity.getEyeVariant() % 7;
         return new ResourceLocation("fantastikmod",
                 "textures/entity/kitsune/eyes/kitsune_eyes_" + eyeVariant + ".png");
     }
-
-    // Установить режим рендеринга глаз
     public void setRenderingEyes(boolean renderingEyes) {
         this.renderingEyes = renderingEyes;
     }

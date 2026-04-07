@@ -50,6 +50,8 @@ public class ModConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> SPIDER_LILY_KEY = registerKey("spider_lily");
 
     public static final ResourceKey<ConfiguredFeature<?, ?>> MOONSTONE_KEY = registerKey("moonstone");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> KITSUNE_STATUE_KEY = registerKey("kitsune_statue");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> WILD_CATNIP_KEY = registerKey("wild_catnip");
 
    // public static final ResourceKey<ConfiguredFeature<?, ?>> TEA_HOUSE_KEY = registerKey("tea_house");
 
@@ -142,6 +144,14 @@ public class ModConfiguredFeatures {
         context.register(MOON_CRYSTAL_CLUSTER_KEY,
                 new ConfiguredFeature<>(ModFeatures.MOON_CRYSTAL_CLUSTER.get(),
                         new NoneFeatureConfiguration()));
+
+        register(context, KITSUNE_STATUE_KEY, Feature.SIMPLE_BLOCK,
+                new SimpleBlockConfiguration(BlockStateProvider.simple(ModBlocks.KITSUNE_STATUE.get())));
+
+        register(context, WILD_CATNIP_KEY, Feature.FLOWER,
+                new RandomPatchConfiguration(16, 4, 1,
+                        PlacementUtils.onlyWhenEmpty(Feature.SIMPLE_BLOCK,
+                                new SimpleBlockConfiguration(BlockStateProvider.simple(ModBlocks.WILD_CATNIP.get())))));
 
 
 

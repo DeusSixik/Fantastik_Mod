@@ -3,6 +3,7 @@ package net.lisalaf.fantastikmod.block;
 import com.eliotlash.mclib.math.Constant;
 import net.lisalaf.fantastikmod.block.custom.*;
 import net.lisalaf.fantastikmod.fantastikmod;
+import net.lisalaf.fantastikmod.item.ModFoods;
 import net.lisalaf.fantastikmod.item.ModItems;
 import net.lisalaf.fantastikmod.sound.ModSounds;
 import net.lisalaf.fantastikmod.worldgen.tree.MoonTreeGrower;
@@ -496,6 +497,44 @@ public class ModBlocks {
                     }
                 }
             });
+    public static final RegistryObject<Block> CATNIP_WINE = registerBlock("catnip_wine",
+            () -> new LanternBlock(BlockBehaviour.Properties.of()
+                    .instabreak()
+                    .noOcclusion()
+                    .strength(0.1f)
+                    .sound(SoundType.GLASS)
+            ));
+
+    public static final RegistryObject<Block> KITSUNE_STATUE = registerBlock("kitsune_statue",
+            () -> new KitsuneStatueBlock(BlockBehaviour.Properties.of()
+                    .instabreak()
+                    .strength(2.0f)
+                    .noOcclusion()
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.STONE)
+                    .hasPostProcess((state, level, pos) -> true) // Добавьте
+            ));
+
+    public static final RegistryObject<Block> SAKE = registerBlock("sake",
+            () -> new LanternBlock(BlockBehaviour.Properties.of()
+                    .instabreak()
+                    .noOcclusion()
+                    .strength(0.1f)
+                    .sound(SoundType.GLASS)
+            ));
+
+    public static final RegistryObject<Block> WILD_CATNIP = registerBlock("wild_catnip",
+            () -> new FlowerBlock(MobEffects.CONFUSION, 5,
+                    BlockBehaviour.Properties.copy(Blocks.TALL_GRASS)
+                            .noOcclusion()
+                            .sound(SoundType.GRASS)
+                            .randomTicks()));
+
+    public static final RegistryObject<Block> CATNIP_CROP = registerBlock("catnip_crop",
+            () -> new CatnipCropBlock(BlockBehaviour.Properties.copy(Blocks.WHEAT)
+                    .noOcclusion()
+                    .randomTicks()
+                    .instabreak()));
 
     public static final RegistryObject<Block> FROST = registerBlock("frost",
             () -> new FrostLayerBlock(BlockBehaviour.Properties.copy(Blocks.SNOW).lightLevel(state -> 2)));
