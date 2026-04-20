@@ -87,17 +87,10 @@ public class DialogScreen extends Screen {
             resetQuestButtons();
         });
 
-        tabButtons[1] = new MoodTabButton(tabsX, tabsY + tabHeight + 5, tabWidth, tabHeight,
-                "⭐", 1, currentTab == 1, button -> {
-            if (moodSystem != null) {
-                currentTab = 1;
-                updateTabs();
-                resetQuestCreationCheck();
-                resetQuestButtons();
-            }
-        });
+       // tabButtons[1] = new MoodTabButton(tabsX, tabsY + tabHeight + 5, tabWidth, tabHeight, "⭐", 1, currentTab == 1, button -> {
+          //  if (moodSystem != null) {currentTab = 1;updateTabs();resetQuestCreationCheck();resetQuestButtons();}});
 
-        questTabButton = new QuestTabButton(tabsX, tabsY + (tabHeight * 2) + 10,
+        questTabButton = new QuestTabButton(tabsX, tabsY + tabHeight + 5,
                 tabWidth, tabHeight, 2, currentTab == 2, button -> {
             currentTab = 2;
             updateTabs();

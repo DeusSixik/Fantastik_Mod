@@ -65,6 +65,7 @@ public class ModCreativeModTabs {
                         output.accept(ModItems.MOON_PICKAXE.get());
                         output.accept(ModItems.MOON_SHOVEL.get());
                         output.accept(ModItems.MOON_SWORD.get());
+                        output.accept(ModItems.ECHO_SHARD.get());
 
                         output.accept(ModItems.STRAWBERRY_SEEDS.get());
                         output.accept(ModItems.TEA_SEEDS.get());
@@ -97,6 +98,7 @@ public class ModCreativeModTabs {
                         output.accept(ModBlocks.AURIPIGMENT_ORE_BLOCK.get());
                         output.accept(ModBlocks.AURIPIGMENT_BLOCK.get());
                         output.accept(ModBlocks.TREE_MOON_LOG_BLOCK.get());
+                        output.accept(ModBlocks.TREE_MOON_WOOD.get());
                         output.accept(ModBlocks.MOON_SAPLING.get());
                         output.accept(ModBlocks.MOON_PLANKS.get());
                         output.accept(ModBlocks.MOON_TREE_DOOR.get());

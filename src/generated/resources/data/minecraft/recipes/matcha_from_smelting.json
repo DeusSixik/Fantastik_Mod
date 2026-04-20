@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "cookingtime": 200,
+  "experience": 0.35,
+  "ingredient": {
+    "item": "fantastikmod:tea_leaf"
+  },
+  "result": "fantastikmod:matcha_powder"
+}

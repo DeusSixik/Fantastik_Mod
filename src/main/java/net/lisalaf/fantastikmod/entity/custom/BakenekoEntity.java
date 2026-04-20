@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -40,12 +41,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -55,6 +58,8 @@ import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 import java.util.List;
 import java.util.UUID;
@@ -75,7 +80,6 @@ public class BakenekoEntity extends Animal implements GeoEntity {
     private static final EntityDataAccessor<Boolean> DATA_IS_BABY = SynchedEntityData.defineId(BakenekoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_GROWTH_TIME = SynchedEntityData.defineId(BakenekoEntity.class, EntityDataSerializers.INT);
 
-    // Состояния анимации
     public static final int ANIMATION_IDLE = 0;
     public static final int ANIMATION_WALK = 1;
     public static final int ANIMATION_STAND_IDLE = 2;
@@ -87,7 +91,6 @@ public class BakenekoEntity extends Animal implements GeoEntity {
     public static final int ANIMATION_SLEEP2 = 8;
     public static final int ANIMATION_SLEEP3 = 9;
 
-    // Размеры (мальчики на 10% больше)
     private static final float BASE_WIDTH = 0.6f;
     private static final float BASE_HEIGHT = 0.6f;
     private static final float MALE_SCALE = 1.9f;
@@ -95,7 +98,6 @@ public class BakenekoEntity extends Animal implements GeoEntity {
     private static final float STANDING_HEIGHT = 1.2f;
     private static final float BABY_SCALE = 0.5f;
 
-    // Таймеры и состояния
     private int standCooldown = 0;
     private int animationChangeCooldown = 0;
     private int stealCooldown = 0;
@@ -112,13 +114,10 @@ public class BakenekoEntity extends Animal implements GeoEntity {
     private boolean isSleeping = false;
     private int loveCooldown = 0;
 
-    // Время роста детёныша (20 минут = 24000 тиков)
     private static final int GROWTH_TIME = 24000;
 
-    // Шанс размножения 10%
     private static final float BREEDING_CHANCE = 0.1f;
 
-    // Варианты окраса
     private static final double[] VARIANT_SPAWN_CHANCES = {
             0.30,  // variant 0 - 30%
             0.24,  // variant 1 - 24%
@@ -185,16 +184,13 @@ public class BakenekoEntity extends Animal implements GeoEntity {
     private float getCurrentWidth() {
         float width = BASE_WIDTH;
 
-        // Детёныши в 2 раза меньше
         if (isBabyEntity()) {
             width *= BABY_SCALE;
         }
-        // Мальчики на 10% больше
         else if (isMale()) {
             width *= MALE_SCALE;
         }
 
-        // В режиме стояния ширина увеличивается
         if (isStanding()) {
             width = STANDING_WIDTH;
             if (isMale() && !isBabyEntity()) {
@@ -355,10 +351,48 @@ public class BakenekoEntity extends Animal implements GeoEntity {
 
         if (this.level() == null) return;
 
+        if ((isSitting || isSleeping) && (this.getDeltaMovement().horizontalDistanceSqr() > 0.001D || this.getTarget() != null)) {
+            forceWakeUp();
+        }
+
         if (isSitting || isSleeping) {
             this.getNavigation().stop();
             this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
             return;
+        }
+
+        if (this.isInWater() || this.isInLava()) {
+            forceWakeUp();
+            BlockPos landPos = getRandomLandPos();
+            this.getNavigation().moveTo(landPos.getX() + 0.5, landPos.getY(), landPos.getZ() + 0.5, 1.8);
+            if (this.tickCount % 20 == 0) {
+                this.playSound(SoundEvents.CAT_HISS, 1.0F, 1.5F);
+            }
+            return;
+        }
+
+        if (this.level().isRaining() && this.level().canSeeSky(this.blockPosition())) {
+            forceWakeUp();
+            findShelter();
+            return;
+        }
+
+        if (isSitting || isSleeping) {
+            this.getNavigation().stop();
+            this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
+            return;
+        }
+
+        if (this.isInWater() || this.isInLava()) {
+            BlockPos landPos = getRandomLandPos();
+            this.getNavigation().moveTo(landPos.getX() + 0.5, landPos.getY(), landPos.getZ() + 0.5, 1.5);
+            if (this.tickCount % 20 == 0) {
+                this.playSound(SoundEvents.CAT_HISS, 1.0F, 1.5F);
+            }
+        }
+
+        if (this.level().isRaining() && this.level().canSeeSky(this.blockPosition())) {
+            findShelter();
         }
 
         if (!this.level().isClientSide) {
@@ -570,16 +604,15 @@ public class BakenekoEntity extends Animal implements GeoEntity {
     private void handleItemDrop() {
         if (dropCooldown > 0) return;
 
-        if (isInventoryFull() && this.random.nextFloat() < 0.005f) {
+        if (isInventoryFull()) {
             dropLeastValuableItem();
             dropCooldown = 200;
+            return;
         }
 
         if (!this.heldItem.isEmpty() && isFood(this.heldItem)) {
             if (this.getHealth() < this.getMaxHealth()) {
                 eatHeldFood();
-            } else if (this.random.nextFloat() < 0.4f) {
-                dropHeldItem();
             }
         }
     }
@@ -600,10 +633,17 @@ public class BakenekoEntity extends Animal implements GeoEntity {
         }
 
         if (worstSlot != -1) {
-            spawnAtLocation(inventory.getItem(worstSlot).copy());
+            ItemStack toDrop = inventory.getItem(worstSlot).copy();
             inventory.setItem(worstSlot, ItemStack.EMPTY);
-        } else if (!this.heldItem.isEmpty()) {
-            dropHeldItem();
+
+            // Выбрасываем на несколько блоков вперёд
+            Vec3 lookVec = this.getLookAngle();
+            double x = this.getX() + lookVec.x * 2.0;
+            double z = this.getZ() + lookVec.z * 2.0;
+
+            ItemEntity itemEntity = new ItemEntity(this.level(), x, this.getY() + 0.5, z, toDrop);
+            itemEntity.setDeltaMovement(lookVec.x * 0.5, 0.3, lookVec.z * 0.5);
+            this.level().addFreshEntity(itemEntity);
         }
     }
 
@@ -730,6 +770,10 @@ public class BakenekoEntity extends Animal implements GeoEntity {
         if (itemInHand.getItem() == ModItems.CATNIP.get() ||
                 itemInHand.getItem() == ModItems.DRIED_CATNIP.get()) {
             wakeUp();
+
+            setSitting(false, null);
+            setSleeping(false, null);
+            stopSittingSleepingAnimation();
 
 
             if (!this.level().isClientSide) {
@@ -998,6 +1042,18 @@ public class BakenekoEntity extends Animal implements GeoEntity {
         return super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
     }
 
+    @Override
+    public boolean checkSpawnRules(LevelAccessor level, MobSpawnType spawnType) {
+        BlockPos pos = this.blockPosition();
+        BlockState belowState = level.getBlockState(pos.below());
+
+        if (belowState.getFluidState().is(FluidTags.WATER)) {
+            return false;
+        }
+
+        return super.checkSpawnRules(level, spawnType);
+    }
+
     private int getRandomVariant(RandomSource random) {
         double val = random.nextDouble();
         double cum = 0;
@@ -1029,6 +1085,14 @@ public class BakenekoEntity extends Animal implements GeoEntity {
         } else this.sleepDuration = 0;
     }
 
+    public boolean isSitting() {
+        return isSitting;
+    }
+
+    public boolean isSleeping() {
+        return isSleeping;
+    }
+
     public boolean isStanding() { return entityData.get(DATA_STANDING); }
     public void setStanding(boolean standing) { entityData.set(DATA_STANDING, standing); }
     public int getAnimationState() { return entityData.get(DATA_ANIMATION_STATE); }
@@ -1043,4 +1107,54 @@ public class BakenekoEntity extends Animal implements GeoEntity {
     public void setLastThief(Player player) { this.lastThief = player; }
     public ItemStack getHeldItem() { return heldItem.copy(); }
     public void setHeldItem(ItemStack stack) { this.heldItem = stack; }
+
+    private void findShelter() {
+        BlockPos pos = this.blockPosition();
+        BlockPos bestShelter = null;
+        double bestDistance = Double.MAX_VALUE;
+
+        for (int x = -15; x <= 15; x++) {
+            for (int z = -15; z <= 15; z++) {
+                for (int y = -5; y <= 5; y++) {
+                    BlockPos checkPos = pos.offset(x, y, z);
+                    if (!this.level().canSeeSky(checkPos) && this.level().getBlockState(checkPos).isAir()) {
+                        double dist = this.distanceToSqr(checkPos.getX() + 0.5, checkPos.getY(), checkPos.getZ() + 0.5);
+                        if (dist < bestDistance) {
+                            bestDistance = dist;
+                            bestShelter = checkPos;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (bestShelter != null) {
+            this.getNavigation().moveTo(bestShelter.getX() + 0.5, bestShelter.getY(), bestShelter.getZ() + 0.5, 1.3);
+            if (bestDistance < 4.0) {
+                this.getNavigation().stop();
+            }
+        }
+    }
+
+    private BlockPos getRandomLandPos() {
+        BlockPos pos = this.blockPosition();
+        for (int i = 0; i < 20; i++) {
+            int x = pos.getX() + (random.nextInt(21) - 10);
+            int z = pos.getZ() + (random.nextInt(21) - 10);
+            int y = this.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            BlockPos checkPos = new BlockPos(x, y, z);
+            if (!this.level().getBlockState(checkPos).getFluidState().is(FluidTags.WATER)) {
+                return checkPos;
+            }
+        }
+        return pos.above();
+    }
+    public void forceWakeUp() {
+        if (isSitting || isSleeping) {
+            setSitting(false, null);
+            setSleeping(false, null);
+            stopSittingSleepingAnimation();
+            this.getNavigation().stop();
+        }
+    }
 }

@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "drying=false": {
       "model": "fantastikmod:block/drying_basket"
+    },
+    "drying=true": {
+      "model": "fantastikmod:block/drying_basket_cooking"
     }
   }
 }

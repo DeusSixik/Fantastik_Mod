@@ -1,6 +1,7 @@
 package net.lisalaf.fantastikmod.worldgen;
 
 import net.lisalaf.fantastikmod.fantastikmod;
+import net.lisalaf.fantastikmod.worldgen.feature.BigMoonTreeFeature;
 import net.lisalaf.fantastikmod.worldgen.feature.DragonCaveFeature;
 import net.lisalaf.fantastikmod.worldgen.feature.MoonCrystalClusterFeature;
 import net.minecraft.resources.ResourceKey;
@@ -16,6 +17,9 @@ import static net.lisalaf.fantastikmod.worldgen.ModConfiguredFeatures.registerKe
 public class ModFeatures {
     public static final DeferredRegister<Feature<?>> FEATURES =
             DeferredRegister.create(ForgeRegistries.FEATURES, fantastikmod.MOD_ID);
+
+    public static final RegistryObject<Feature<NoneFeatureConfiguration>> BIG_MOON_TREE = FEATURES.register("big_moon_tree",
+            () -> new BigMoonTreeFeature());
 
    // public static final RegistryObject<Feature<NoneFeatureConfiguration>> DRAGON_CAVE = FEATURES.register("dragon_cave", () -> new DragonCaveFeature(NoneFeatureConfiguration.CODEC));
 

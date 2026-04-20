@@ -122,7 +122,12 @@ public class ModItemModelProvider extends ItemModelProvider {
         registerSimpleItem("dried_catnip");
         registerSimpleItem("catnip_seeds");
 
+        registerBlockItemBlockTexture("moon_vine");
+
         registerBlockItem("wild_catnip");
+        withExistingParent("echo_shard", "item/generated")
+                .texture("layer0", modLoc("item/echo_shard"));
+        registerBlockItem("tree_moon_wood");
 
         saplingItem(ModBlocks.MOON_SAPLING);
 

@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 123450987,
+    "separation": 20,
+    "spacing": 60
+  },
+  "structures": [
+    {
+      "structure": "fantastikmod:moon_ruin_church",
+      "weight": 1
+    }
+  ]
+}

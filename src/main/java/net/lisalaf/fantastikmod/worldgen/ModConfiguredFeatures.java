@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvi
 import net.minecraft.world.level.levelgen.feature.treedecorators.LeaveVineDecorator;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.FancyTrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.ForkingTrunkPlacer;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.GiantTrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer;
 import net.minecraft.world.level.levelgen.placement.*;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
@@ -39,7 +41,7 @@ public class ModConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> OVERWORLD_AURIPIGMENT_ORE_KEY = registerKey("auripigment_ore");
     public static final ResourceKey<ConfiguredFeature<?, ?>> MOON_ORE_KEY = registerKey("moon_ore");
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> MOON_KEY = registerKey("moon");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> MOON_TREE_KEY = registerKey("moon_tree");
     public static final ResourceKey<ConfiguredFeature<?, ?>> MOON_LILY_KEY = registerKey("moon_lily");
     public static final ResourceKey<ConfiguredFeature<?, ?>> MOON_NORTHERN_BLUEBELL_KEY = registerKey("moon_northern_bluebell");
     public static final ResourceKey<ConfiguredFeature<?, ?>> MOON_HEATHER_KEY = registerKey("moon_heather");
@@ -52,6 +54,7 @@ public class ModConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> MOONSTONE_KEY = registerKey("moonstone");
     public static final ResourceKey<ConfiguredFeature<?, ?>> KITSUNE_STATUE_KEY = registerKey("kitsune_statue");
     public static final ResourceKey<ConfiguredFeature<?, ?>> WILD_CATNIP_KEY = registerKey("wild_catnip");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> BIG_MOON_TREE_KEY = registerKey("big_moon_tree");
 
    // public static final ResourceKey<ConfiguredFeature<?, ?>> TEA_HOUSE_KEY = registerKey("tea_house");
 
@@ -74,14 +77,14 @@ public class ModConfiguredFeatures {
                 OreConfiguration.target(stoneReplaceable, ModBlocks.MOON_ORE.get().defaultBlockState()));
         register(context, MOON_ORE_KEY, Feature.ORE, new OreConfiguration(moonOres, 5));
 
-        register(context, MOON_KEY, Feature.TREE, new TreeConfiguration.TreeConfigurationBuilder(
+        register(context, MOON_TREE_KEY, Feature.TREE, new TreeConfiguration.TreeConfigurationBuilder(
                 BlockStateProvider.simple(ModBlocks.TREE_MOON_LOG_BLOCK.get()),
-                new FancyTrunkPlacer(10, 12, 5), // Более естественные ветвления
+                new FancyTrunkPlacer(5, 12, 5),
                 BlockStateProvider.simple(ModBlocks.TREE_MOON_FOLIAGE_BLOCK.get()),
-                new FancyFoliagePlacer(ConstantInt.of(2), ConstantInt.of(3), 5), // Соответствующая листва
+                new FancyFoliagePlacer(ConstantInt.of(2), ConstantInt.of(3), 5),
                 new TwoLayersFeatureSize(1, 2, 4, OptionalInt.of(3)))
+                .dirt(BlockStateProvider.simple(Blocks.AIR))
                 .ignoreVines()
-                //.decorators(List.of(new MoonVineTreeDecorator()))
                 .build());
 
         register(context, MOON_HEATHER_KEY, Feature.FLOWER,
@@ -152,6 +155,10 @@ public class ModConfiguredFeatures {
                 new RandomPatchConfiguration(16, 4, 1,
                         PlacementUtils.onlyWhenEmpty(Feature.SIMPLE_BLOCK,
                                 new SimpleBlockConfiguration(BlockStateProvider.simple(ModBlocks.WILD_CATNIP.get())))));
+
+        register(context, BIG_MOON_TREE_KEY, ModFeatures.BIG_MOON_TREE.get(), new NoneFeatureConfiguration());
+
+
 
 
 

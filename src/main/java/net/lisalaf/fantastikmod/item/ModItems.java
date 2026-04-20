@@ -292,6 +292,9 @@ public class ModItems {
                 }
             });
 
+    public static final RegistryObject<Item> ECHO_SHARD = ITEMS.register("echo_shard",
+            () -> new Item(new Item.Properties().stacksTo(64)));
+
     public static final RegistryObject<Item> NOTE_1 = ITEMS.register("note_1",
             () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> NOTE_2 = ITEMS.register("note_2",

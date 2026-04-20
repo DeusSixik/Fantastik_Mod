@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "fantastikmod:block/tree_moon_log_block",
+    "side": "fantastikmod:block/tree_moon_log_block"
+  }
+}

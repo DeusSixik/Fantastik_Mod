@@ -21,16 +21,13 @@ public class QuestTabButton extends Button {
 
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        // Стили как у MoodTabButton, но с символом "!"
         int bgColor = active ? 0xFF3A2618 : 0xFF1A0D0A;
         int borderColor = active ? 0xFFD4AF37 : 0xFF780D13;
         int textColor = active ? 0xFFFFF98A : 0xAAAAAA;
 
-        // Фон и рамка (упрощенно, как в MoodTabButton)
         guiGraphics.fill(this.getX(), this.getY(),
                 this.getX() + this.width, this.getY() + this.height, bgColor);
 
-        // Рамка
         guiGraphics.fill(this.getX(), this.getY(),
                 this.getX() + this.width, this.getY() + 1, borderColor);
         guiGraphics.fill(this.getX(), this.getY() + this.height - 1,
@@ -42,7 +39,6 @@ public class QuestTabButton extends Button {
 
         var minecraft = net.minecraft.client.Minecraft.getInstance();
 
-        // Символ "!" по центру
         guiGraphics.drawCenteredString(minecraft.font, "!",
                 this.getX() + this.width / 2,
                 this.getY() + (this.height - minecraft.font.lineHeight) / 2,

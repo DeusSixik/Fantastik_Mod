@@ -2,12 +2,16 @@ package net.lisalaf.fantastikmod.datagen.loot;
 
 import net.lisalaf.fantastikmod.block.ModBlocks;
 import net.lisalaf.fantastikmod.block.custom.*;
+import net.lisalaf.fantastikmod.fantastikmod;
 import net.lisalaf.fantastikmod.item.ModItems;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableProvider;
+import net.minecraft.data.loot.LootTableSubProvider;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -26,7 +30,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
+@SuppressWarnings("removal")
 public class ModBlockLootTables extends LootTableProvider {
 
     public ModBlockLootTables(PackOutput output) {
@@ -63,6 +69,7 @@ public class ModBlockLootTables extends LootTableProvider {
             this.dropSelf(ModBlocks.MOON_GEM_BLOCK.get());
             this.dropSelf(ModBlocks.SILVER_BLOCK.get());
             this.dropSelf(ModBlocks.MOON_SAPLING.get());
+            this.dropSelf(ModBlocks.TREE_MOON_WOOD.get());
 
             this.dropSelf(ModBlocks.DRYING_BASKET.get());
             this.dropSelf(ModBlocks.CATNIP_WINE.get());

@@ -7,6 +7,6 @@ import terrablender.api.Regions;
 @SuppressWarnings("removal")
 public class ModTerrablender {
     public static void registerBiomes() {
-        Regions.register(new ModOverworldRegion(new ResourceLocation(fantastikmod.MOD_ID, "overworld"), 3));
+        Regions.register(new ModOverworldRegion(new ResourceLocation(fantastikmod.MOD_ID, "overworld"), 2));
     }
 }

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "l": {
+      "item": "fantastikmod:tree_moon_log_block"
+    }
+  },
+  "pattern": [
+    "ll",
+    "ll"
+  ],
+  "result": {
+    "count": 3,
+    "item": "fantastikmod:tree_moon_wood"
+  },
+  "show_notification": true
+}

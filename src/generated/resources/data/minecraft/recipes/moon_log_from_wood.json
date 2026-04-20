@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "fantastikmod:tree_moon_wood"
+    }
+  ],
+  "result": {
+    "count": 4,
+    "item": "fantastikmod:tree_moon_log_block"
+  }
+}

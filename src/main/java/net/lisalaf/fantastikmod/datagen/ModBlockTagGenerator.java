@@ -34,7 +34,8 @@ public class ModBlockTagGenerator extends BlockTagsProvider {
                         ModBlocks.MOON_PLANKS_PLATE.get(),
                         ModBlocks.MOON_TREE_DOOR.get(),
                         ModBlocks.MOON_TREE_TRAPDOOR.get(),
-                        ModBlocks.TREE_MOON_LOG_BLOCK.get());
+                        ModBlocks.TREE_MOON_LOG_BLOCK.get(),
+                        ModBlocks.TREE_MOON_WOOD.get());
 
         tag(BlockTags.MINEABLE_WITH_SHOVEL)
                 .add(ModBlocks.ASH_BLOCK.get());
@@ -98,7 +99,8 @@ public class ModBlockTagGenerator extends BlockTagsProvider {
                 .add(ModBlocks.MOON_PLANKS.get());
 
         tag(BlockTags.LOGS_THAT_BURN)
-                .add(ModBlocks.TREE_MOON_LOG_BLOCK.get());
+                .add(ModBlocks.TREE_MOON_LOG_BLOCK.get())
+                .add(ModBlocks.TREE_MOON_WOOD.get());
 
 
     }

@@ -20,7 +20,7 @@ public class BakenekoGoal extends Goal {
     private final float maxDistance;
 
     private Player followingPlayer;
-    private Player targetPlayer; // Игрок, за которым нужно следить (вор или с едой)
+    private Player targetPlayer;
     private int eatCooldown;
     private BlockPos shelterPos;
     private int shelterCooldown;
@@ -46,11 +46,19 @@ public class BakenekoGoal extends Goal {
             return false;
         }
 
+        if (bakeneko.isInWater() || bakeneko.isInLava()) {
+            return false;
+        }
+
         Level level = bakeneko.level();
         if (level == null) return false;
 
         if (actionCooldown > 0) {
             actionCooldown--;
+            return false;
+        }
+
+        if (bakeneko.isSitting() || bakeneko.isSleeping()) {
             return false;
         }
 
@@ -387,6 +395,11 @@ public class BakenekoGoal extends Goal {
             actionCooldown = 200;
             return;
         }
+
+        if (bakeneko.isSitting() || bakeneko.isSleeping()) {
+            bakeneko.forceWakeUp();
+        }
+
         boolean shouldFollow = false;
 
         if (bakeneko.isAngry() && targetPlayer == bakeneko.getLastThief()) {

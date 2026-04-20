@@ -22,10 +22,10 @@ public class ModWorldGenProvider extends DatapackBuiltinEntriesProvider {
             .add(Registries.CONFIGURED_FEATURE, ModConfiguredFeatures::bootstrap)
             .add(Registries.PLACED_FEATURE, ModPlacedFeatures::bootstrap)
             .add(ForgeRegistries.Keys.BIOME_MODIFIERS, ModBiomeModifiers::bootstrap)
-            .add(Registries.BIOME, ModBiomes::boostrap);
-            //.add(Registries.STRUCTURE, ModStructures::bootstrap)
-            //.add(Registries.TEMPLATE_POOL, ModTemplatePools::bootstrap)
-            //.add(Registries.STRUCTURE_SET, ModStructures::bootstrapSets);
+            .add(Registries.BIOME, ModBiomes::boostrap)
+            .add(Registries.STRUCTURE, ModStructures::bootstrap)
+            .add(Registries.TEMPLATE_POOL, ModTemplatePools::bootstrap)
+            .add(Registries.STRUCTURE_SET, ModStructures::bootstrapSets);
     public ModWorldGenProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, registries, BUILDER, Set.of(fantastikmod.MOD_ID));
     }

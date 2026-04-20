@@ -70,7 +70,10 @@ public class ModBlocks {
                 }
             });
     public static final RegistryObject<Block> DRYING_BASKET = registerBlock("drying_basket",
-            () -> new Block(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)));
+            () -> new DryingBasketBlock(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)
+                    .strength(2.0f)
+                    .noOcclusion()
+                    .sound(SoundType.WOOD)));
 
     public static final RegistryObject<Block> STRAWBERRY_CROP = BLOCKS.register("strawberry_crop",
             () -> new StrawberryCropBlock(BlockBehaviour.Properties.copy(Blocks.WHEAT).noOcclusion().noOcclusion()));
@@ -135,6 +138,9 @@ public class ModBlocks {
                             .noOcclusion(),
                     BlockSetType.CHERRY
             ));
+
+    public static final RegistryObject<Block> TREE_MOON_WOOD = registerBlock("tree_moon_wood",
+            () -> new ModFlammableRotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WOOD).lightLevel(state -> 4)));
 
     public static final RegistryObject<Block> SPIDER_LILY = registerBlock("spider_lily",
             () -> new FlowerBlock(
@@ -213,13 +219,13 @@ public class ModBlocks {
 
     public static final RegistryObject<Block> MOON_VINE = registerBlock("moon_vine",
             () -> new MoonVineBlock(BlockBehaviour.Properties.copy(Blocks.WEEPING_VINES)
-                    .lightLevel(state -> 5)
+                    .lightLevel(state -> state.getValue(MoonVineBlock.TIP) ? 5 : 0)
                     .sound(SoundType.GRASS)));
 
 
 
     public static final RegistryObject<Block> MOON_SAPLING = registerBlock("moon_sapling",
-            () -> new SaplingBlock(new MoonTreeGrower(), BlockBehaviour.Properties.copy(Blocks.CHERRY_SAPLING)));
+            () -> new MoonSaplingBlock(new MoonTreeGrower(), BlockBehaviour.Properties.copy(Blocks.CHERRY_SAPLING)));
 
     public static final RegistryObject<Block> TREE_MOON_FOLIAGE_BLOCK = registerBlock("tree_moon_foliage_block",
             () -> new LeavesBlock(BlockBehaviour.Properties.copy(Blocks.ACACIA_LEAVES)
@@ -258,8 +264,6 @@ public class ModBlocks {
 
     public static final RegistryObject<Block> MOON_ORE = registerBlock("moon_ore",
             () -> new DropExperienceBlock(BlockBehaviour.Properties.copy(Blocks.DIAMOND_ORE).lightLevel(state -> 7)){
-
-                // Токсичные частицы
                 @Override
                 public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
                     if (random.nextInt(7) == 0) {
@@ -289,11 +293,9 @@ public class ModBlocks {
                                 .lightLevel(state -> 1)
                                 .strength(2.5f, 3.0f)
                                 .randomTicks()
-                                //.emissiveRendering((state, level, pos) -> true)
                                 .hasPostProcess((state, level, pos) -> true)
                                 .requiresCorrectToolForDrops(), UniformInt.of(2, 5)) {
 
-                // Токсичные частицы
                 @Override
                 public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
                     if (random.nextInt(5) == 0) {
@@ -305,20 +307,18 @@ public class ModBlocks {
                     }
                 }
 
-                // Эффект при ходьбе
                 @Override
                 public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
                     if (entity instanceof LivingEntity livingEntity && !level.isClientSide()) {
                         livingEntity.addEffect(new MobEffectInstance(
                                 MobEffects.POISON,
-                                100,  // 5 секунд
-                                0     // Уровень I
+                                100,
+                                0
                         ));
                     }
                     super.stepOn(level, pos, state, entity);
                 }
 
-                // Эффект при добыче
                 @Override
                 public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state,
                                           @Nullable BlockEntity blockEntity, ItemStack tool) {

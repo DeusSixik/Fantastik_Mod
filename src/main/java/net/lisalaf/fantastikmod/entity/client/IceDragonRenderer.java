@@ -93,7 +93,6 @@ public class IceDragonRenderer extends GeoEntityRenderer<IceDragonEntity> {
         }
 
 
-       // renderEyes(entity, poseStack, bufferSource, partialTick, packedLight);
     }
 
     private void renderEyes(IceDragonEntity entity, PoseStack poseStack,

@@ -10,7 +10,7 @@
             "state": {
               "Name": "fantastikmod:moon_vine",
               "Properties": {
-                "is_tip": "true"
+                "tip": "true"
               }
             }
           }

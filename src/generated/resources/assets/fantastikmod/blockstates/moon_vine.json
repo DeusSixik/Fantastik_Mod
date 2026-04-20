@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "tip=false": {
       "model": "fantastikmod:block/moon_vine"
+    },
+    "tip=true": {
+      "model": "fantastikmod:block/moon_vine_tip"
     }
   }
 }

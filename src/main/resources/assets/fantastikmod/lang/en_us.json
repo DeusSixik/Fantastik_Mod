@@ -47,6 +47,7 @@
   "item.fantastikmod.dried_catnip": "Dried Catnip",
   "item.fantastikmod.catnip_seeds": "Catnip Seeds",
   "item.fantastikmod.catnip_wine": "Catnip Wine",
+  "item.fantastikmod.echo_shard": "Echo Shard",
 
   "": "",
   "═══════════════════════════════════════════════════════": "",
@@ -122,7 +123,7 @@
 
   "": "",
   "═══════════════════════════════════════════════════════": "",
-  "                      MOON TREE                         ": "",
+  "                         MOON                          ": "",
   "═══════════════════════════════════════════════════════": "",
 
   "block.fantastikmod.tree_moon_log_block": "Moon Tree Log",
@@ -138,6 +139,7 @@
   "block.fantastikmod.moon_planks_stairs": "Moon Planks Stairs",
   "block.fantastikmod.moon_planks_slab": "Moon Planks Slab",
   "block.fantastikmod.moon_planks_wall": "Moon Planks Wall",
+  "block.fantastikmod.tree_moon_wood": "Moon Wood",
 
   "": "",
   "═══════════════════════════════════════════════════════": "",

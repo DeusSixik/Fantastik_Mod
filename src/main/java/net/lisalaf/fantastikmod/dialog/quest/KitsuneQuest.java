@@ -55,10 +55,6 @@ public class KitsuneQuest extends Quest {
             return false;
         }
 
-        if (isForTamed && kitsune.getMoodSystem().getMood() < 30) {
-            return false;
-        }
-
         return !isActive && !isCompleted;
     }
 
@@ -226,7 +222,6 @@ public class KitsuneQuest extends Quest {
         Item item = getRandomRewardItem(forTamed, questType);
 
         if (forTamed) {
-            // Награды прирученных
             if (item == Items.BONE || item == Items.ROTTEN_FLESH || item == Items.STRING) {
                 return 1 + (int)(Math.random() * 3);
             }
@@ -241,7 +236,6 @@ public class KitsuneQuest extends Quest {
             return 1;
         }
 
-        // Награды диких
         if (item == Items.COAL || item == Items.REDSTONE || item == Items.LAPIS_LAZULI) {
             return 2 + (int)(Math.random() * 4);
         }

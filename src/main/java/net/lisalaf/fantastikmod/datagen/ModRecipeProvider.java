@@ -26,6 +26,18 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("has_strawberry", has(ModItems.STRAWBERRY.get()))
                 .save(pWriter, "strawberry_seeds_from_strawberry");
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.TREE_MOON_WOOD.get(), 3)
+                .pattern("ll")
+                .pattern("ll")
+                .define('l', ModBlocks.TREE_MOON_LOG_BLOCK.get())
+                .unlockedBy("has_moon_log", has(ModBlocks.TREE_MOON_LOG_BLOCK.get()))
+                .save(pWriter);
+
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.TREE_MOON_LOG_BLOCK.get(), 4)
+                .requires(ModBlocks.TREE_MOON_WOOD.get())
+                .unlockedBy("has_moon_wood", has(ModBlocks.TREE_MOON_WOOD.get()))
+                .save(pWriter, "moon_log_from_wood");
+
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.SAKE.get(), 1)
                 .pattern("   ")
                 .pattern(" S ")
@@ -492,14 +504,22 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(ModItems.TEA_LEAFS_GREEN.get()),
                         RecipeCategory.FOOD,
                         ModItems.TEA_LEAFS_BLACK.get(),
-                        0.35f,  // Опыт
-                        200)    // Время в тиках (10 секунд)
+                        0.35f,
+                        200)
                 .unlockedBy("has_tea_leafs_green", has(ModItems.TEA_LEAFS_GREEN.get()))
                 .save(pWriter, "black_tea_from_smelting");
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(ModItems.TEA_LEAFS_GREEN.get()),
+                        RecipeCategory.FOOD,
+                        ModItems.TEA_LEAFS_BLACK.get(),
+                        0.35f,
+                        100)
+                .unlockedBy("has_tea_leafs_green", has(ModItems.TEA_LEAFS_GREEN.get()))
+                .save(pWriter, "black_tea_from_smoking");
+
         ShapedRecipeBuilder.shaped(RecipeCategory.FOOD, ModItems.DOUGH_MOCHI.get(), 3)
                 .pattern("rrr")
                 .pattern("   ")
-                .pattern("   ") // три строки всего
+                .pattern("   ")
                 .define('r', ModItems.RICE.get())
                 .unlockedBy("has_rice", has(ModItems.RICE.get()))
                 .save(pWriter);
@@ -522,9 +542,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                         RecipeCategory.FOOD,
                         ModItems.MATCHA_POWDER.get(),
                         0.35f,
-                        100)   // 5 секунд
+                        100)
                 .unlockedBy("has_tea_leaf", has(ModItems.TEA_LEAF.get()))
                 .save(pWriter, "matcha_from_smoking");
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(ModItems.TEA_LEAF.get()),
+                        RecipeCategory.FOOD,
+                        ModItems.MATCHA_POWDER.get(),
+                        0.35f,
+                        200)
+                .unlockedBy("has_tea_leaf", has(ModItems.TEA_LEAF.get()))
+                .save(pWriter, "matcha_from_smelting");
 
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(ModItems.SILVER_RAW.get()),
                         RecipeCategory.MISC,

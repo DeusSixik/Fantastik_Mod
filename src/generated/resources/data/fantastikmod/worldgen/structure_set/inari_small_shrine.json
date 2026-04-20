@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 1122334455,
+    "separation": 12,
+    "spacing": 45
+  },
+  "structures": [
+    {
+      "structure": "fantastikmod:inari_small_shrine",
+      "weight": 1
+    }
+  ]
+}

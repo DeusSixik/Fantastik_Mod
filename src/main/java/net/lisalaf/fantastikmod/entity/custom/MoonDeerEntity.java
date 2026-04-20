@@ -20,6 +20,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -36,7 +37,9 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
@@ -75,8 +78,8 @@ public class MoonDeerEntity extends Animal implements GeoEntity, PlayerRideable 
     private int jumpCooldown = 0;
 
     // Константы для анимации питья
-    private static final int DRINK_ANIMATION_DURATION = 72; // 3.6 секунды (72 тика)
-    private static final int DRINK_COOLDOWN = 1200; // 60 секунд
+    private static final int DRINK_ANIMATION_DURATION = 72;
+    private static final int DRINK_COOLDOWN = 1200;
 
     public MoonDeerEntity(EntityType<? extends Animal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -95,6 +98,8 @@ public class MoonDeerEntity extends Animal implements GeoEntity, PlayerRideable 
     @Override
     public void tick() {
         super.tick();
+
+
 
         if (!this.level().isClientSide) {
             updateTimers();
@@ -185,7 +190,6 @@ public class MoonDeerEntity extends Animal implements GeoEntity, PlayerRideable 
         this.playSound(SoundEvents.GENERIC_DRINK, 0.7F, 0.8F + this.random.nextFloat() * 0.4F);
 
         if (this.level().isClientSide) {
-            // Запускаем частицы с задержкой
             new java.util.Timer().schedule(
                     new java.util.TimerTask() {
                         @Override
@@ -201,7 +205,7 @@ public class MoonDeerEntity extends Animal implements GeoEntity, PlayerRideable 
                             }
                         }
                     },
-                    1000 // 1 секунда задержки
+                    1000
             );
         }
     }
@@ -551,7 +555,6 @@ public class MoonDeerEntity extends Animal implements GeoEntity, PlayerRideable 
             float speedMultiplier = isRunning() ? 1.8F : 1.0F;
             this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED) * speedMultiplier);
 
-            // Прыжок при движении вперед + пробел
             if (forward > 0 && this.jumping && this.onGround() && jumpCooldown <= 0) {
                 performCustomJump();
                 this.jumping = false;
@@ -569,7 +572,6 @@ public class MoonDeerEntity extends Animal implements GeoEntity, PlayerRideable 
     // === ЗАЩИТА ОТ УРОНА ПРИ ПАДЕНИИ ===
     @Override
     public boolean causeFallDamage(float fallDistance, float damageMultiplier, DamageSource source) {
-        // Не получать урон при падении с высоты до 4 блоков
         if (fallDistance <= 4.0F) {
             return false;
         }
@@ -1046,5 +1048,17 @@ public class MoonDeerEntity extends Animal implements GeoEntity, PlayerRideable 
             };
             return Component.literal(messages[random.nextInt(messages.length)]);
         }
+    }
+
+    @Override
+    public boolean checkSpawnRules(LevelAccessor level, MobSpawnType spawnType) {
+        BlockPos pos = this.blockPosition();
+        BlockState belowState = level.getBlockState(pos.below());
+
+        if (belowState.getFluidState().is(FluidTags.WATER)) {
+            return false;
+        }
+
+        return super.checkSpawnRules(level, spawnType);
     }
 }

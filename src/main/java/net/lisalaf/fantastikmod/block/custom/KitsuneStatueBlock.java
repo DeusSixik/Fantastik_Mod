@@ -2,6 +2,7 @@ package net.lisalaf.fantastikmod.block.custom;
 
 import net.lisalaf.fantastikmod.effect.ModEffects;
 import net.lisalaf.fantastikmod.entity.custom.KitsuneLightEntity;
+import net.lisalaf.fantastikmod.entity.custom.MoonDeerEntity;
 import net.lisalaf.fantastikmod.fantastikmod;
 import net.lisalaf.fantastikmod.item.ModItems;
 import net.lisalaf.fantastikmod.block.ModBlocks;
@@ -111,7 +112,20 @@ public class KitsuneStatueBlock extends Block {
     @Override
     public void attack(BlockState state, Level level, BlockPos pos, Player player) {
         if (!level.isClientSide) {
-            startDialogWithNearbyKitsune(level, player);
+            boolean hasKitsune = false;
+            for (KitsuneLightEntity kitsune : level.getEntitiesOfClass(KitsuneLightEntity.class,
+                    player.getBoundingBox().inflate(16))) {
+                if (kitsune.isTamed()) {
+                    hasKitsune = true;
+                    break;
+                }
+            }
+
+            if (hasKitsune) {
+                startDialogWithNearbyKitsune(level, player);
+            } else {
+                startDialogWithNearbyMoonDeer(level, player);
+            }
         }
         super.attack(state, level, pos, player);
     }
@@ -157,7 +171,20 @@ public class KitsuneStatueBlock extends Block {
         }
 
         if (!level.isClientSide) {
-            startDialogWithNearbyKitsune(level, player);
+            boolean hasKitsune = false;
+            for (KitsuneLightEntity kitsune : level.getEntitiesOfClass(KitsuneLightEntity.class,
+                    player.getBoundingBox().inflate(16))) {
+                if (kitsune.isTamed()) {
+                    hasKitsune = true;
+                    break;
+                }
+            }
+
+            if (hasKitsune) {
+                startDialogWithNearbyKitsune(level, player);
+            } else {
+                startDialogWithNearbyMoonDeer(level, player);
+            }
 
             if (player instanceof ServerPlayer serverPlayer) {
                 Advancement advancement = serverPlayer.server.getAdvancements()
@@ -253,5 +280,91 @@ public class KitsuneStatueBlock extends Block {
             return false;
         }
         return false;
+    }
+
+    private void startDialogWithNearbyMoonDeer(Level level, Player player) {
+        MoonDeerEntity nearbyMoonDeer = null;
+        double closestDistance = 16.0;
+
+        for (MoonDeerEntity moonDeer : level.getEntitiesOfClass(MoonDeerEntity.class,
+                player.getBoundingBox().inflate(16))) {
+            if (moonDeer.isTamed()) {
+                double distance = player.distanceTo(moonDeer);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    nearbyMoonDeer = moonDeer;
+                }
+            }
+        }
+
+        if (nearbyMoonDeer != null) {
+            if (activeDialogs.containsKey(player.getUUID()) && activeDialogs.get(player.getUUID()).isActive) {
+                return;
+            }
+
+            DialogState dialogState = new DialogState();
+            activeDialogs.put(player.getUUID(), dialogState);
+
+            sendNextMoonDeerDialogLine(level, player, nearbyMoonDeer, dialogState);
+
+            if (level instanceof ServerLevel serverLevel) {
+                scheduleNextMoonDeerDialog(serverLevel, player, nearbyMoonDeer, dialogState, 1);
+            }
+        }
+    }
+
+    private static final String[] MOON_DEER_DIALOG_LINES_RU = {
+            "Это чья-то статуя? Божества или зверя?",
+            "Много лет назад в Лунном лесу жили люди, они верили в своих богов",
+            "У них были подобные статуи для своих божеств, но люди ушли вместе с упавшим осколком луны...",
+            "А от статуй почти ничего не осталось"
+    };
+
+    private static final String[] MOON_DEER_DIALOG_LINES_EN = {
+            "Is this someone's statue? A deity or a beast?",
+            "Many years ago, people lived in the Moon Forest, they believed in their gods",
+            "They had similar statues for their deities, but the people left with a fallen shard of the moon...",
+            "Almost nothing remains of the statues"
+    };
+
+    private void scheduleNextMoonDeerDialog(ServerLevel level, Player player, MoonDeerEntity moonDeer, DialogState state, int nextLineIndex) {
+        new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                return;
+            }
+
+            level.getServer().execute(() -> {
+                if (!state.isActive || player.isRemoved() || !player.isAlive()) {
+                    activeDialogs.remove(player.getUUID());
+                    return;
+                }
+
+                state.currentLine = nextLineIndex;
+
+                if (state.currentLine < MOON_DEER_DIALOG_LINES_RU.length) {
+                    sendNextMoonDeerDialogLine(level, player, moonDeer, state);
+                    scheduleNextMoonDeerDialog(level, player, moonDeer, state, state.currentLine + 1);
+                } else {
+                    state.isActive = false;
+                    activeDialogs.remove(player.getUUID());
+                }
+            });
+        }).start();
+    }
+
+    private void sendNextMoonDeerDialogLine(Level level, Player player, MoonDeerEntity moonDeer, DialogState state) {
+        boolean isRussian = isRussianPlayer(player);
+        String[] lines = isRussian ? MOON_DEER_DIALOG_LINES_RU : MOON_DEER_DIALOG_LINES_EN;
+
+        if (state.currentLine < lines.length) {
+            String deerName = moonDeer.getCustomName() != null ?
+                    moonDeer.getCustomName().getString() :
+                    (isRussian ? "Лунный олень" : "Moon Deer");
+
+            String message = deerName + ": " + lines[state.currentLine];
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(message));
+        }
     }
 }

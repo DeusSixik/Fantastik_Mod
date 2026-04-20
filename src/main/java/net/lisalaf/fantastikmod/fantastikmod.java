@@ -139,6 +139,9 @@ public class fantastikmod {
         if(event.getItemStack().getItem() == ModBlocks.TREE_MOON_LOG_BLOCK.get().asItem()) {
             event.setBurnTime(300);
         }
+        if(event.getItemStack().getItem() == ModBlocks.TREE_MOON_WOOD.get().asItem()) {
+            event.setBurnTime(300);
+        }
         if(event.getItemStack().getItem() == ModBlocks.MOON_PLANKS_SLAB.get().asItem()) {
             event.setBurnTime(150); // 7.5 секунд
         }
@@ -151,6 +154,7 @@ public class fantastikmod {
         if(event.getItemStack().getItem() == ModBlocks.MOON_PLANKS_FENCE_GATE.get().asItem()) {
             event.setBurnTime(300);
         }
+
     }
 
 }

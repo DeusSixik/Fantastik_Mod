@@ -1,4 +1,4 @@
-// 1.20.1	2026-04-06T18:33:13.109255	Loot Tables
+// 1.20.1	2026-04-12T16:23:39.4455933	Loot Tables
 b0ac6d05772691c53f71656a660673af83b8589d data/fantastikmod/loot_tables/blocks/ash_block.json
 b1afd71791786b2bd9b446578b0212aad7be94ca data/fantastikmod/loot_tables/blocks/auripigment_block.json
 7bb11a449c0c7b07085beec173c606af5033b406 data/fantastikmod/loot_tables/blocks/auripigment_ore_block.json
@@ -46,4 +46,5 @@ ff5f2eb8a514be2da13a416e7c779cc9d56ce224 data/fantastikmod/loot_tables/blocks/st
 b1f0cfe2d08a0e03e2a5fa2f4a4130c8459f555f data/fantastikmod/loot_tables/blocks/tea_crop.json
 c9bedde29e7e5835d653f1d646a9b4d4c0ef5e41 data/fantastikmod/loot_tables/blocks/tree_moon_foliage_block.json
 a8bdb70e9881d04dbf28b5e289335b83fafb7739 data/fantastikmod/loot_tables/blocks/tree_moon_log_block.json
+ad1334c0b31cc5d005d136b7e601ed5ddd1936b3 data/fantastikmod/loot_tables/blocks/tree_moon_wood.json
 bcd21175f07fb9bb82535c4d1f0e01d371f6e3dc data/fantastikmod/loot_tables/blocks/wild_catnip.json

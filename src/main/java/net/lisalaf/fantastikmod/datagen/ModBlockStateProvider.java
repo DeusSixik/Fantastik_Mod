@@ -24,18 +24,23 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
     public ModBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper) {
         super(output, fantastikmod.MOD_ID, exFileHelper);
-        System.out.println("ModBlockStateProvider constructor called");
     }
 
     @Override
     protected void registerStatesAndModels() {
-        System.out.println("Registering block states and models...");
 
-        // ПРОСТЫЕ БЛОКИ (которые дропают себя)
+        // ПРОСТЫЕ БЛОКИ
         simpleBlockWithItem(ModBlocks.ASH_BLOCK.get(), cubeAll(ModBlocks.ASH_BLOCK.get()));
         simpleBlockWithItem(ModBlocks.MOON_CRYSTAL_BLOCK.get(), cubeAll(ModBlocks.MOON_CRYSTAL_BLOCK.get()));
         simpleBlockWithItem(ModBlocks.AURIPIGMENT_BLOCK.get(), cubeAll(ModBlocks.AURIPIGMENT_BLOCK.get()));
-        simpleBlockWithItem(ModBlocks.DRYING_BASKET.get(), cubeAll(ModBlocks.DRYING_BASKET.get()));
+
+        ModelFile idleModel = models().getExistingFile(modLoc("block/drying_basket"));
+        ModelFile dryingModel = models().getExistingFile(modLoc("block/drying_basket_cooking"));
+
+        getVariantBuilder(ModBlocks.DRYING_BASKET.get())
+                .partialState().with(DryingBasketBlock.DRYING, false).modelForState().modelFile(idleModel).addModel()
+                .partialState().with(DryingBasketBlock.DRYING, true).modelForState().modelFile(dryingModel).addModel();
+
         simpleBlockWithItem(ModBlocks.GEMKITSUNE_BLOCK.get(), cubeAll(ModBlocks.GEMKITSUNE_BLOCK.get()));
         simpleBlockWithItem(ModBlocks.MOON_PLANKS.get(), cubeAll(ModBlocks.MOON_PLANKS.get()));
 
@@ -49,11 +54,11 @@ public class ModBlockStateProvider extends BlockStateProvider {
         leavesBlock(ModBlocks.TREE_MOON_FOLIAGE_BLOCK);
         
         logBlock((RotatedPillarBlock) ModBlocks.TREE_MOON_LOG_BLOCK.get(),
-                modLoc("block/tree_moon_log_block"),      // боковая текстура
-                modLoc("block/tree_moon_log_block_top")   // текстура торцов
+                modLoc("block/tree_moon_log_block"),
+                modLoc("block/tree_moon_log_block_top")
         );
 
-        // ФУНКЦИОНАЛЬНЫЕ БЛОКИ (специальные модели)
+        // ФУНКЦИОНАЛЬНЫЕ БЛОКИ
         // Лестница
         stairsBlock(((StairBlock) ModBlocks.MOON_PLANKS_STAIRS.get()),
                 blockTexture(ModBlocks.MOON_PLANKS.get()));
@@ -126,12 +131,19 @@ public class ModBlockStateProvider extends BlockStateProvider {
                                 blockTexture(ModBlocks.MOON_GRASS_1.get()))
                         .renderType("cutout"));
 
+        logBlock((RotatedPillarBlock) ModBlocks.TREE_MOON_WOOD.get(),
+                modLoc("block/tree_moon_log_block"),
+                modLoc("block/tree_moon_log_block"));
+
         saplingBlock(ModBlocks.MOON_SAPLING);
 
+        ModelFile vineBodyModel = models().cross("moon_vine", modLoc("block/moon_vine")).renderType("cutout");
+        ModelFile vineTipModel = models().cross("moon_vine_tip", modLoc("block/moon_vine_tip")).renderType("cutout");
 
-        simpleBlockWithItem(ModBlocks.MOON_VINE.get(),
-                models().cross("moon_vine", modLoc("block/moon_vine"))
-                        .renderType("cutout"));
+        getVariantBuilder(ModBlocks.MOON_VINE.get())
+                .partialState().with(MoonVineBlock.TIP, false).modelForState().modelFile(vineBodyModel).addModel()
+                .partialState().with(MoonVineBlock.TIP, true).modelForState().modelFile(vineTipModel).addModel();
+
 
         simpleBlockWithItem(ModBlocks.MOON_CRYSTAL_GLASS.get(),
                 models().cubeAll("moon_crystal_glass",
@@ -177,7 +189,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
             int rotationX = 0;
             int rotationY = 0;
 
-            // Правильные повороты для всех направлений
             switch(dir) {
                 case DOWN:
                     rotationX = 180;
@@ -276,7 +287,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 models().singleTexture(ForgeRegistries.BLOCKS.getKey(blockRegistryObject.get()).getPath(),
                                 new ResourceLocation("minecraft:block/leaves"),
                                 "all", blockTexture(blockRegistryObject.get()))
-                        .renderType("cutout_mipped")); // Используйте "cutout_mipped" для листвы
+                        .renderType("cutout_mipped"));
     }
     private void logBlock(RotatedPillarBlock block, ResourceLocation sideTexture, ResourceLocation endTexture) {
         axisBlock(block, sideTexture, endTexture);
@@ -342,7 +353,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         return switch (dir) {
             case DOWN -> 180;
             case UP -> 0;
-            default -> 90; // Для всех горизонтальных
+            default -> 90;
         };
     }
 

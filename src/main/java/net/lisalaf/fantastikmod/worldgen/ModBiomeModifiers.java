@@ -66,6 +66,7 @@ public class ModBiomeModifiers {
                                 4
                         )
                 )
+
         ));
 
         context.register(ADD_BAKENEKO_TO_VILLAGE_BIOMES, new ForgeBiomeModifiers.AddSpawnsBiomeModifier(
