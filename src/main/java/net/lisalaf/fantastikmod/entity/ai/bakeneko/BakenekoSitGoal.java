@@ -20,6 +20,11 @@ public class BakenekoSitGoal extends MoveToBlockGoal {
 
     @Override
     public boolean canUse() {
+
+        if (bakeneko.isInWater() || bakeneko.isInLava()) {
+            return false;
+        }
+
         return !this.bakeneko.isAngry()
                 && !this.bakeneko.isSleeping()
                 && this.bakeneko.getRandom().nextFloat() < 0.01f // Шанс захотеть посидеть

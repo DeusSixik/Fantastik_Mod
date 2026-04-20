@@ -790,11 +790,16 @@ public class BakenekoEntity extends Animal implements GeoEntity {
 
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, false));
 
-        this.goalSelector.addGoal(3, new TemptGoal(
-                this, 1.2D,
-                Ingredient.of(ModItems.CATNIP.get(), ModItems.DRIED_CATNIP.get()),
-                false)
-        );
+        /*
+            Логика пробуждения котика ради еды
+         */
+        this.goalSelector.addGoal(3, new TemptGoal(this, 1.2D, Ingredient.of(ModItems.CATNIP.get(), ModItems.DRIED_CATNIP.get()), false) {
+            @Override
+            public void start() {
+                super.start();
+                BakenekoEntity.this.wakeUp();
+            }
+        });
 
         /*
             true означает, что кот будет закрывать за собой дверь (если нужно, чтобы оставлял открытой - ставь false)

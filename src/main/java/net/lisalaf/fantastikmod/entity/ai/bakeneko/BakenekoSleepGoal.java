@@ -24,6 +24,11 @@ public class BakenekoSleepGoal extends MoveToBlockGoal {
 
     @Override
     public boolean canUse() {
+
+        if (bakeneko.isInWater() || bakeneko.isInLava()) {
+            return false;
+        }
+
         /*
             Спим только если моб спокоен, и вероятность прокнула
          */
