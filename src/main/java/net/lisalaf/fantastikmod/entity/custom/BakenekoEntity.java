@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -35,11 +36,13 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -110,7 +113,11 @@ public class BakenekoEntity extends Animal implements GeoEntity {
     private int sleepDuration = 0;
     private BlockPos sittingPos = null;
     private BlockPos sleepSpot = null;
+
+    @Getter
     private boolean isSitting = false;
+
+    @Getter
     private boolean isSleeping = false;
     private int loveCooldown = 0;
 
@@ -355,13 +362,19 @@ public class BakenekoEntity extends Animal implements GeoEntity {
     }
 
     public void wakeUp() {
-        if (isSleeping) {
+        if (isSleeping || isSitting) {
+            setSitting(false, null);
             setSleeping(false, null);
             stopSittingSleepingAnimation();
         }
-        if (isSitting) {
+    }
+
+    public void forceWakeUp() {
+        if (isSitting || isSleeping) {
             setSitting(false, null);
+            setSleeping(false, null);
             stopSittingSleepingAnimation();
+            this.getNavigation().stop();
         }
     }
 
@@ -536,14 +549,22 @@ public class BakenekoEntity extends Animal implements GeoEntity {
         }
 
         if (worstSlot != -1) {
-            spawnAtLocation(inventory.getItem(worstSlot).copy());
+            ItemStack toDrop = inventory.getItem(worstSlot).copy();
             inventory.setItem(worstSlot, ItemStack.EMPTY);
+
+            Vec3 lookVec = this.getLookAngle();
+            double x = this.getX() + lookVec.x * 2.0;
+            double z = this.getZ() + lookVec.z * 2.0;
+
+            ItemEntity itemEntity = new ItemEntity(this.level(), x, this.getY() + 0.5, z, toDrop);
+            itemEntity.setDeltaMovement(lookVec.x * 0.5, 0.3, lookVec.z * 0.5);
+            this.level().addFreshEntity(itemEntity);
         } else if (!this.heldItem.isEmpty()) {
             dropHeldItem();
         }
     }
 
-    private void dropHeldItem() {
+    public void dropHeldItem() {
         if (!this.heldItem.isEmpty()) {
             spawnAtLocation(this.heldItem.copy());
             this.heldItem = ItemStack.EMPTY;
@@ -551,7 +572,7 @@ public class BakenekoEntity extends Animal implements GeoEntity {
         }
     }
 
-    private void eatHeldFood() {
+    public void eatHeldFood() {
         if (!this.heldItem.isEmpty() && isFood(this.heldItem)) {
             this.heal(4.0F);
             this.heldItem.shrink(1);
@@ -790,10 +811,13 @@ public class BakenekoEntity extends Animal implements GeoEntity {
 
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, false));
 
+        this.goalSelector.addGoal(3, new BakenekoEscapeWaterGoal(this));
+        this.goalSelector.addGoal(4, new BakenekoFleeRainGoal(this));
+
         /*
             Логика пробуждения котика ради еды
          */
-        this.goalSelector.addGoal(3, new TemptGoal(this, 1.2D, Ingredient.of(ModItems.CATNIP.get(), ModItems.DRIED_CATNIP.get()), false) {
+        this.goalSelector.addGoal(5, new TemptGoal(this, 1.2D, Ingredient.of(ModItems.CATNIP.get(), ModItems.DRIED_CATNIP.get()), false) {
             @Override
             public void start() {
                 super.start();
@@ -804,20 +828,20 @@ public class BakenekoEntity extends Animal implements GeoEntity {
         /*
             true означает, что кот будет закрывать за собой дверь (если нужно, чтобы оставлял открытой - ставь false)
          */
-        this.goalSelector.addGoal(4, new OpenDoorGoal(this, true));
-        this.goalSelector.addGoal(5, new BakenekoSleepGoal(this, 1.0D));
-        this.goalSelector.addGoal(6, new BakenekoSitGoal(this, 1.0D));
-        this.goalSelector.addGoal(7, new BakenekoStealGoal(this, 1.1D));
-        this.goalSelector.addGoal(8, new BakenekoPickupItemGoal(this, 1.2D));
-        this.targetSelector.addGoal(9, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
+        this.goalSelector.addGoal(6, new OpenDoorGoal(this, true));
+        this.goalSelector.addGoal(7, new BakenekoSleepGoal(this, 1.0D));
+        this.goalSelector.addGoal(8, new BakenekoSitGoal(this, 1.0D));
+        this.goalSelector.addGoal(9, new BakenekoStealGoal(this, 1.1D));
+        this.goalSelector.addGoal(10, new BakenekoPickupItemGoal(this, 1.2D));
+        this.targetSelector.addGoal(11, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
                 player -> player.getMainHandItem().getItem() == ModItems.CATNIP.get() ||
                         player.getOffhandItem().getItem() == ModItems.CATNIP.get() ||
                         player.getMainHandItem().getItem() == ModItems.DRIED_CATNIP.get() ||
                         player.getOffhandItem().getItem() == ModItems.DRIED_CATNIP.get()));
-        this.goalSelector.addGoal(10, new WaterAvoidingRandomStrollGoal(this, 0.8D));
-        this.goalSelector.addGoal(11, new LookAtPlayerGoal(this, Player.class, 8.0F));
-        this.goalSelector.addGoal(12, new RandomLookAroundGoal(this));
-        this.goalSelector.addGoal(13, new BakenekoInventoryGoal(this));
+        this.goalSelector.addGoal(12, new WaterAvoidingRandomStrollGoal(this, 0.8D));
+        this.goalSelector.addGoal(13, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(14, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(15, new BakenekoInventoryGoal(this));
 
         this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
                 player -> isAngry() && player == lastThief));
@@ -962,6 +986,18 @@ public class BakenekoEntity extends Animal implements GeoEntity {
             if (val < cum) return i;
         }
         return 0;
+    }
+
+    @Override
+    public boolean checkSpawnRules(LevelAccessor level, @NotNull MobSpawnType spawnType) {
+        BlockPos pos = this.blockPosition();
+        BlockState belowState = level.getBlockState(pos.below());
+
+        if (belowState.getFluidState().is(FluidTags.WATER)) {
+            return false;
+        }
+
+        return super.checkSpawnRules(level, spawnType);
     }
 
     // ==================== ГЕТТЕРЫ/СЕТТЕРЫ ====================

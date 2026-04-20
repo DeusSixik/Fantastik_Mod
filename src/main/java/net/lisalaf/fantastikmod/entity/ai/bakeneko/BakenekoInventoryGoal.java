@@ -31,6 +31,7 @@ public class BakenekoInventoryGoal extends Goal {
         /*
             Логика поедания еды из лап
          */
+
         ItemStack held = this.bakeneko.getHeldItem();
         if (!held.isEmpty() && this.bakeneko.isFood(held)) {
             if (this.bakeneko.getHealth() < this.bakeneko.getMaxHealth()) {
