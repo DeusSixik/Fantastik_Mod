@@ -187,8 +187,8 @@ public class ModArmorItem extends ArmorItem {
                     /*
                         Быстрое вычисление вектора отступления
                      */
-                    final double dx = entity.getX() - player.getX();
-                    final double dz = entity.getZ() - player.getZ();
+                    double dx = entity.getX() - player.getX();
+                    double dz = entity.getZ() - player.getZ();
 
                     /*
                          Если они стоят в одной точке, задаем небольшое случайное направление
